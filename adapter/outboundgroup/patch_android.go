@@ -3,8 +3,8 @@
 package outboundgroup
 
 import (
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/constant/provider"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/constant/provider"
 )
 
 type ProxyGroup interface {

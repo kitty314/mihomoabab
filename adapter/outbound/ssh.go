@@ -12,10 +12,10 @@ import (
 	"strings"
 	"sync"
 
-	N "github.com/metacubex/mihomo/common/net"
-	"github.com/metacubex/mihomo/component/dialer"
-	"github.com/metacubex/mihomo/component/proxydialer"
-	C "github.com/metacubex/mihomo/constant"
+	N "github.com/metacubex/clash/common/net"
+	"github.com/metacubex/clash/component/dialer"
+	"github.com/metacubex/clash/component/proxydialer"
+	C "github.com/metacubex/clash/constant"
 
 	"github.com/metacubex/randv2"
 	"golang.org/x/crypto/ssh"

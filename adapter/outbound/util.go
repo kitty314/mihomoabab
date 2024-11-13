@@ -11,9 +11,9 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/metacubex/mihomo/component/resolver"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/transport/socks5"
+	"github.com/metacubex/clash/component/resolver"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/transport/socks5"
 )
 
 var (

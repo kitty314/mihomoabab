@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/metacubex/mihomo/common/pool"
-	"github.com/metacubex/mihomo/component/resource"
-	C "github.com/metacubex/mihomo/constant"
-	P "github.com/metacubex/mihomo/constant/provider"
+	"github.com/metacubex/clash/common/pool"
+	"github.com/metacubex/clash/component/resource"
+	C "github.com/metacubex/clash/constant"
+	P "github.com/metacubex/clash/constant/provider"
 
 	"gopkg.in/yaml.v3"
 )

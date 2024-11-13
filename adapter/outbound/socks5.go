@@ -10,11 +10,11 @@ import (
 	"net/netip"
 	"strconv"
 
-	"github.com/metacubex/mihomo/component/ca"
-	"github.com/metacubex/mihomo/component/dialer"
-	"github.com/metacubex/mihomo/component/proxydialer"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/transport/socks5"
+	"github.com/metacubex/clash/component/ca"
+	"github.com/metacubex/clash/component/dialer"
+	"github.com/metacubex/clash/component/proxydialer"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/transport/socks5"
 )
 
 type Socks5 struct {

@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/metacubex/mihomo/component/ca"
-	"github.com/metacubex/mihomo/component/dialer"
-	"github.com/metacubex/mihomo/listener/inner"
+	"github.com/metacubex/clash/component/ca"
+	"github.com/metacubex/clash/component/dialer"
+	"github.com/metacubex/clash/listener/inner"
 )
 
 var (

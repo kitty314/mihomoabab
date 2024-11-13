@@ -2,7 +2,7 @@ package common
 
 import (
 	"fmt"
-	C "github.com/metacubex/mihomo/constant"
+	C "github.com/metacubex/clash/constant"
 	"strings"
 )
 

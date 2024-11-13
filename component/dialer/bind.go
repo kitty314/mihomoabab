@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/metacubex/mihomo/component/iface"
+	"github.com/metacubex/clash/component/iface"
 )
 
 func LookupLocalAddrFromIfaceName(ifaceName string, network string, destination netip.Addr, port int) (net.Addr, error) {

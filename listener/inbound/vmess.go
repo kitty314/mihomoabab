@@ -1,10 +1,10 @@
 package inbound
 
 import (
-	C "github.com/metacubex/mihomo/constant"
-	LC "github.com/metacubex/mihomo/listener/config"
-	"github.com/metacubex/mihomo/listener/sing_vmess"
-	"github.com/metacubex/mihomo/log"
+	C "github.com/metacubex/clash/constant"
+	LC "github.com/metacubex/clash/listener/config"
+	"github.com/metacubex/clash/listener/sing_vmess"
+	"github.com/metacubex/clash/log"
 )
 
 type VmessOption struct {

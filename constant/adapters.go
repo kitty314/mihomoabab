@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	N "github.com/metacubex/mihomo/common/net"
-	"github.com/metacubex/mihomo/common/utils"
-	"github.com/metacubex/mihomo/component/dialer"
+	N "github.com/metacubex/clash/common/net"
+	"github.com/metacubex/clash/common/utils"
+	"github.com/metacubex/clash/component/dialer"
 )
 
 // Adapter Type

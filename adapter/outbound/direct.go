@@ -6,11 +6,11 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/metacubex/mihomo/component/dialer"
-	"github.com/metacubex/mihomo/component/loopback"
-	"github.com/metacubex/mihomo/component/resolver"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/constant/features"
+	"github.com/metacubex/clash/component/dialer"
+	"github.com/metacubex/clash/component/loopback"
+	"github.com/metacubex/clash/component/resolver"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/constant/features"
 )
 
 var DisableLoopBackDetector, _ = strconv.ParseBool(os.Getenv("DISABLE_LOOPBACK_DETECTOR"))
