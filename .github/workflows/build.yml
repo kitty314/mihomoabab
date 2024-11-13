@@ -6,13 +6,8 @@ on:
       - "docs/**"
       - "README.md"
       - ".github/ISSUE_TEMPLATE/**"
-    branches:
-      - Alpha
     tags:
-      - "v*"
-  pull_request_target:
-    branches:
-      - Alpha
+      - "kitty*"
       
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
