@@ -188,12 +188,6 @@ jobs:
           fetch-depth: '0'
           fetch-tags: 'true'
 
-      - name: Get tags
-        run: |
-          echo "CURRENTVERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
-          git fetch --tags
-          echo "PREVERSION=$(git describe --tags --abbrev=0 HEAD)" >> $GITHUB_ENV
-
       - uses: actions/download-artifact@v4
         with:
           path: bin/
@@ -207,7 +201,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: ${{ success() }}
         with:
-          tag_name: ${{ github.event.inputs.version }}
+          tag_name: ${{ github.ref_name }}
           files: bin/*
           generate_release_notes: true
 
