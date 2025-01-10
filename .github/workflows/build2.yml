@@ -124,6 +124,16 @@ jobs:
       if: ${{ github.event_name != 'workflow_dispatch' && github.ref_name == 'Alpha' }}
       run: echo "VERSION=alpha-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       shell: bash
+      
+    - name: Set variables
+      run: echo "VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Set variables
+      if: ${{github.ref_name=='' || github.ref_type=='tag'}}
+      run: echo "VERSION=$(git describe --tags)" >> $GITHUB_ENV
+      shell: bash
+
 
     - name: Set Time Variable
       run: |
