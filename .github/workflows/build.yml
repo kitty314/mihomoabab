@@ -30,7 +30,7 @@ jobs:
             }
     steps:
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set variables
         run: echo "VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
@@ -76,14 +76,14 @@ jobs:
         if: ${{ matrix.job.type!='WithoutCGO-GO120' }}
         uses: actions/setup-go@v4
         with:
-          go-version: "1.21"
+          go-version: "1.22"
           check-latest: true
 
       - name: Setup Go
         if: ${{ matrix.job.type=='WithoutCGO-GO120' }}
         uses: actions/setup-go@v4
         with:
-          go-version: "1.20"
+          go-version: "1.22"
           check-latest: true
 
       - name: Test
