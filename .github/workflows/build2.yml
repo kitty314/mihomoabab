@@ -209,5 +209,5 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.version }}
           files: bin/*
-          body_path: release.md
+          generate_release_notes: true
 
