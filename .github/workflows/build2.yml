@@ -1,0 +1,213 @@
+name: Build
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Tag version to release"
+        required: true
+  push:
+    paths-ignore:
+      - "docs/**"
+      - "README.md"
+      - ".github/ISSUE_TEMPLATE/**"
+    branches:
+      - Alpha
+    tags:
+      - "kitten*"
+  pull_request_target:
+    branches:
+      - Alpha
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+  
+env:
+  REGISTRY: docker.io
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        jobs:
+          - { goos: windows, goarch: '386', output: '386' }
+          - { goos: windows, goarch: amd64, goamd64: v1, output: amd64-compatible }
+          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64 }
+          # Go 1.22 with special patch can work on Windows 7
+          # https://github.com/MetaCubeX/go/commits/release-branch.go1.22/
+          - { goos: windows, goarch: '386', output: '386-go122', goversion: '1.22' }
+          - { goos: windows, goarch: amd64, goamd64: v1, output: amd64-compatible-go122, goversion: '1.22' }
+          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-go122, goversion: '1.22' }
+
+          # Go 1.21 can revert commit `9e4385` to work on Windows 7
+          # https://github.com/golang/go/issues/64622#issuecomment-1847475161
+          # (OR we can just use golang1.21.4 which unneeded any patch)
+          - { goos: windows, goarch: '386', output: '386-go121', goversion: '1.21' }
+          - { goos: windows, goarch: amd64, goamd64: v1, output: amd64-compatible-go121, goversion: '1.21' }
+          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-go121, goversion: '1.21' }
+
+          # Go 1.20 is the last release that will run on any release of Windows 7, 8, Server 2008 and Server 2012. Go 1.21 will require at least Windows 10 or Server 2016.
+          - { goos: windows, goarch: '386', output: '386-go120', goversion: '1.20' }
+          - { goos: windows, goarch: amd64, goamd64: v1, output: amd64-compatible-go120, goversion: '1.20' }
+          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-go120, goversion: '1.20' }
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      if: ${{ matrix.jobs.goversion == '' && matrix.jobs.abi != '1' }}
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23'
+
+    - name: Set up Go
+      if: ${{ matrix.jobs.goversion != '' && matrix.jobs.abi != '1' }}
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ matrix.jobs.goversion }}
+
+    - name: Set up Go1.23 loongarch abi1
+      if: ${{ matrix.jobs.goarch == 'loong64' && matrix.jobs.abi == '1' }}
+      run: |
+        wget -q https://github.com/MetaCubeX/loongarch64-golang/releases/download/1.23.0/go1.23.0.linux-amd64-abi1.tar.gz
+        sudo tar zxf go1.23.0.linux-amd64-abi1.tar.gz -C /usr/local
+        echo "/usr/local/go/bin" >> $GITHUB_PATH
+
+      # modify from https://github.com/restic/restic/issues/4636#issuecomment-1896455557
+      # this patch file only works on golang1.23.x
+      # that means after golang1.24 release it must be changed
+      # see: https://github.com/MetaCubeX/go/commits/release-branch.go1.23/
+      # revert:
+      # 693def151adff1af707d82d28f55dba81ceb08e1: "crypto/rand,runtime: switch RtlGenRandom for ProcessPrng"
+      # 7c1157f9544922e96945196b47b95664b1e39108: "net: remove sysSocket fallback for Windows 7"
+      # 48042aa09c2f878c4faa576948b07fe625c4707a: "syscall: remove Windows 7 console handle workaround"
+      # a17d959debdb04cd550016a3501dd09d50cd62e7: "runtime: always use LoadLibraryEx to load system libraries"
+    - name: Revert Golang1.23 commit for Windows7/8
+      if: ${{ matrix.jobs.goos == 'windows' && matrix.jobs.goversion == '' }}
+      run: |
+        cd $(go env GOROOT)
+        curl https://github.com/MetaCubeX/go/commit/9ac42137ef6730e8b7daca016ece831297a1d75b.diff | patch --verbose -p 1
+        curl https://github.com/MetaCubeX/go/commit/21290de8a4c91408de7c2b5b68757b1e90af49dd.diff | patch --verbose -p 1
+        curl https://github.com/MetaCubeX/go/commit/6a31d3fa8e47ddabc10bd97bff10d9a85f4cfb76.diff | patch --verbose -p 1
+        curl https://github.com/MetaCubeX/go/commit/69e2eed6dd0f6d815ebf15797761c13f31213dd6.diff | patch --verbose -p 1
+
+      # modify from https://github.com/restic/restic/issues/4636#issuecomment-1896455557
+      # this patch file only works on golang1.22.x
+      # that means after golang1.23 release it must be changed
+      # see: https://github.com/MetaCubeX/go/commits/release-branch.go1.22/
+      # revert:
+      # 693def151adff1af707d82d28f55dba81ceb08e1: "crypto/rand,runtime: switch RtlGenRandom for ProcessPrng"
+      # 7c1157f9544922e96945196b47b95664b1e39108: "net: remove sysSocket fallback for Windows 7"
+      # 48042aa09c2f878c4faa576948b07fe625c4707a: "syscall: remove Windows 7 console handle workaround"
+      # a17d959debdb04cd550016a3501dd09d50cd62e7: "runtime: always use LoadLibraryEx to load system libraries"
+    - name: Revert Golang1.22 commit for Windows7/8
+      if: ${{ matrix.jobs.goos == 'windows' && matrix.jobs.goversion == '1.22' }}
+      run: |
+        cd $(go env GOROOT)
+        curl https://github.com/MetaCubeX/go/commit/9779155f18b6556a034f7bb79fb7fb2aad1e26a9.diff | patch --verbose -p 1
+        curl https://github.com/MetaCubeX/go/commit/ef0606261340e608017860b423ffae5c1ce78239.diff | patch --verbose -p 1
+        curl https://github.com/MetaCubeX/go/commit/7f83badcb925a7e743188041cb6e561fc9b5b642.diff | patch --verbose -p 1
+        curl https://github.com/MetaCubeX/go/commit/83ff9782e024cb328b690cbf0da4e7848a327f4f.diff | patch --verbose -p 1
+
+      # modify from https://github.com/restic/restic/issues/4636#issuecomment-1896455557
+    - name: Revert Golang1.21 commit for Windows7/8
+      if: ${{ matrix.jobs.goos == 'windows' && matrix.jobs.goversion == '1.21' }}
+      run: |
+        cd $(go env GOROOT)
+        curl https://github.com/golang/go/commit/9e43850a3298a9b8b1162ba0033d4c53f8637571.diff | patch --verbose -R -p 1
+
+    - name: Set variables
+      if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version != '' }}
+      run: echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Set variables
+      if: ${{ github.event_name != 'workflow_dispatch' && github.ref_name == 'Alpha' }}
+      run: echo "VERSION=alpha-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Set Time Variable
+      run: |
+        echo "BUILDTIME=$(date)" >> $GITHUB_ENV
+        echo "CGO_ENABLED=0" >> $GITHUB_ENV
+        echo "BUILDTAG=-extldflags --static" >> $GITHUB_ENV
+        echo "GOTOOLCHAIN=local" >> $GITHUB_ENV
+
+
+    - name: Update CA
+      run: |
+        sudo apt-get install ca-certificates
+        sudo update-ca-certificates
+        cp -f /etc/ssl/certs/ca-certificates.crt component/ca/ca-certificates.crt
+
+    - name: Build core
+      env:
+        GOOS: ${{matrix.jobs.goos}}
+        GOARCH: ${{matrix.jobs.goarch}}
+        GOAMD64: ${{matrix.jobs.goamd64}}
+        GOARM: ${{matrix.jobs.goarm}}
+        GOMIPS: ${{matrix.jobs.gomips}}
+      run: |
+        go env
+        go build -v -tags "with_gvisor" -trimpath -ldflags "${BUILDTAG} -X 'github.com/metacubex/clash/constant.Version=${VERSION}' -X 'github.com/metacubex/clash/constant.BuildTime=${BUILDTIME}' -w -s -buildid="
+        if [ "${{matrix.jobs.goos}}" = "windows" ]; then
+          cp clash.exe clash-${{matrix.jobs.goos}}-${{matrix.jobs.output}}.exe
+          zip -r clash-${{matrix.jobs.goos}}-${{matrix.jobs.output}}-${VERSION}.zip clash-${{matrix.jobs.goos}}-${{matrix.jobs.output}}.exe
+        else
+          cp clash clash-${{matrix.jobs.goos}}-${{matrix.jobs.output}}
+          gzip -c clash-${{matrix.jobs.goos}}-${{matrix.jobs.output}} > clash-${{matrix.jobs.goos}}-${{matrix.jobs.output}}-${VERSION}.gz
+          rm clash-${{matrix.jobs.goos}}-${{matrix.jobs.output}}
+        fi
+
+    - name: Save version
+      run: |
+        echo ${VERSION} > version.txt
+      shell: bash
+
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: "${{ matrix.jobs.goos }}-${{ matrix.jobs.output }}"
+        path: |
+          clash*.gz
+          clash*.deb
+          clash*.rpm
+          clash*.zip
+          version.txt
+
+
+  Upload-Release:
+    permissions: write-all
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version != '' }}
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: Meta
+          fetch-depth: '0'
+          fetch-tags: 'true'
+
+      - name: Get tags
+        run: |
+          echo "CURRENTVERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          git fetch --tags
+          echo "PREVERSION=$(git describe --tags --abbrev=0 HEAD)" >> $GITHUB_ENV
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: bin/
+          merge-multiple: true
+  
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: bin
+  
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ success() }}
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          files: bin/*
+          body_path: release.md
+
