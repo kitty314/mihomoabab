@@ -11,36 +11,36 @@ import (
 	"time"
 	_ "unsafe"
 
-	"github.com/metacubex/mihomo/adapter"
-	"github.com/metacubex/mihomo/adapter/inbound"
-	"github.com/metacubex/mihomo/adapter/outboundgroup"
-	"github.com/metacubex/mihomo/component/auth"
-	"github.com/metacubex/mihomo/component/ca"
-	"github.com/metacubex/mihomo/component/dialer"
-	"github.com/metacubex/mihomo/component/geodata"
-	mihomoHttp "github.com/metacubex/mihomo/component/http"
-	"github.com/metacubex/mihomo/component/iface"
-	"github.com/metacubex/mihomo/component/keepalive"
-	"github.com/metacubex/mihomo/component/profile"
-	"github.com/metacubex/mihomo/component/profile/cachefile"
-	"github.com/metacubex/mihomo/component/resolver"
-	"github.com/metacubex/mihomo/component/resource"
-	"github.com/metacubex/mihomo/component/sniffer"
-	tlsC "github.com/metacubex/mihomo/component/tls"
-	"github.com/metacubex/mihomo/component/trie"
-	"github.com/metacubex/mihomo/component/updater"
-	"github.com/metacubex/mihomo/config"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/constant/provider"
-	"github.com/metacubex/mihomo/dns"
-	"github.com/metacubex/mihomo/listener"
-	authStore "github.com/metacubex/mihomo/listener/auth"
-	LC "github.com/metacubex/mihomo/listener/config"
-	"github.com/metacubex/mihomo/listener/inner"
-	"github.com/metacubex/mihomo/listener/tproxy"
-	"github.com/metacubex/mihomo/log"
-	"github.com/metacubex/mihomo/ntp"
-	"github.com/metacubex/mihomo/tunnel"
+	"github.com/metacubex/clash/adapter"
+	"github.com/metacubex/clash/adapter/inbound"
+	"github.com/metacubex/clash/adapter/outboundgroup"
+	"github.com/metacubex/clash/component/auth"
+	"github.com/metacubex/clash/component/ca"
+	"github.com/metacubex/clash/component/dialer"
+	"github.com/metacubex/clash/component/geodata"
+	clashHttp "github.com/metacubex/clash/component/http"
+	"github.com/metacubex/clash/component/iface"
+	"github.com/metacubex/clash/component/keepalive"
+	"github.com/metacubex/clash/component/profile"
+	"github.com/metacubex/clash/component/profile/cachefile"
+	"github.com/metacubex/clash/component/resolver"
+	"github.com/metacubex/clash/component/resource"
+	"github.com/metacubex/clash/component/sniffer"
+	tlsC "github.com/metacubex/clash/component/tls"
+	"github.com/metacubex/clash/component/trie"
+	"github.com/metacubex/clash/component/updater"
+	"github.com/metacubex/clash/config"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/constant/provider"
+	"github.com/metacubex/clash/dns"
+	"github.com/metacubex/clash/listener"
+	authStore "github.com/metacubex/clash/listener/auth"
+	LC "github.com/metacubex/clash/listener/config"
+	"github.com/metacubex/clash/listener/inner"
+	"github.com/metacubex/clash/listener/tproxy"
+	"github.com/metacubex/clash/log"
+	"github.com/metacubex/clash/ntp"
+	"github.com/metacubex/clash/tunnel"
 )
 
 var mux sync.Mutex
@@ -176,7 +176,7 @@ func GetGeneral() *config.General {
 		FindProcessMode:         tunnel.FindProcessMode(),
 		Sniffing:                tunnel.IsSniffing(),
 		GlobalClientFingerprint: tlsC.GetGlobalFingerprint(),
-		GlobalUA:                mihomoHttp.UA(),
+		GlobalUA:                clashHttp.UA(),
 		ETagSupport:             resource.ETag(),
 		KeepAliveInterval:       int(keepalive.KeepAliveInterval() / time.Second),
 		KeepAliveIdle:           int(keepalive.KeepAliveIdle() / time.Second),
@@ -409,7 +409,7 @@ func updateUpdater(cfg *config.Config) {
 	updater.DefaultUiUpdater.AutoDownloadUI()
 }
 
-//go:linkname temporaryUpdateGeneral github.com/metacubex/mihomo/config.temporaryUpdateGeneral
+//go:linkname temporaryUpdateGeneral github.com/metacubex/clash/config.temporaryUpdateGeneral
 func temporaryUpdateGeneral(general *config.General) func() {
 	oldGeneral := GetGeneral()
 	updateGeneral(general, false)
@@ -452,7 +452,7 @@ func updateGeneral(general *config.General, logging bool) {
 	geodata.SetGeoSiteUrl(general.GeoXUrl.GeoSite)
 	geodata.SetMmdbUrl(general.GeoXUrl.Mmdb)
 	geodata.SetASNUrl(general.GeoXUrl.ASN)
-	mihomoHttp.SetUA(general.GlobalUA)
+	clashHttp.SetUA(general.GlobalUA)
 	resource.SetETag(general.ETagSupport)
 
 	tlsC.SetGlobalUtlsClient(general.GlobalClientFingerprint)
@@ -569,5 +569,5 @@ func Shutdown() {
 	tproxy.CleanupTProxyIPTables()
 	resolver.StoreFakePoolState()
 
-	log.Warnln("Mihomo shutting down")
+	log.Warnln("Clash shutting down")
 }

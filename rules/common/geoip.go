@@ -6,12 +6,12 @@ import (
 	"net/netip"
 	"strings"
 
-	"github.com/metacubex/mihomo/component/geodata"
-	"github.com/metacubex/mihomo/component/geodata/router"
-	"github.com/metacubex/mihomo/component/mmdb"
-	"github.com/metacubex/mihomo/component/resolver"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/log"
+	"github.com/metacubex/clash/component/geodata"
+	"github.com/metacubex/clash/component/geodata/router"
+	"github.com/metacubex/clash/component/mmdb"
+	"github.com/metacubex/clash/component/resolver"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/log"
 
 	"golang.org/x/exp/slices"
 )

@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/metacubex/mihomo/adapter/outbound"
-	"github.com/metacubex/mihomo/component/dialer"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/constant/provider"
+	"github.com/metacubex/clash/adapter/outbound"
+	"github.com/metacubex/clash/component/dialer"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/constant/provider"
 )
 
 type Selector struct {

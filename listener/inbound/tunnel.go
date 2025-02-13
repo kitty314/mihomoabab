@@ -3,9 +3,9 @@ package inbound
 import (
 	"fmt"
 
-	C "github.com/metacubex/mihomo/constant"
-	LT "github.com/metacubex/mihomo/listener/tunnel"
-	"github.com/metacubex/mihomo/log"
+	C "github.com/metacubex/clash/constant"
+	LT "github.com/metacubex/clash/listener/tunnel"
+	"github.com/metacubex/clash/log"
 )
 
 type TunnelOption struct {

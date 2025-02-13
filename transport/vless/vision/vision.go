@@ -10,8 +10,8 @@ import (
 	"reflect"
 	"unsafe"
 
-	N "github.com/metacubex/mihomo/common/net"
-	tlsC "github.com/metacubex/mihomo/component/tls"
+	N "github.com/metacubex/clash/common/net"
+	tlsC "github.com/metacubex/clash/component/tls"
 
 	"github.com/gofrs/uuid/v5"
 	utls "github.com/metacubex/utls"

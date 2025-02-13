@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/metacubex/mihomo/component/resolver"
+	"github.com/metacubex/clash/component/resolver"
 
 	"github.com/go-chi/render"
 )

@@ -10,8 +10,8 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/metacubex/mihomo/common/nnip"
-	"github.com/metacubex/mihomo/log"
+	"github.com/metacubex/clash/common/nnip"
+	"github.com/metacubex/clash/log"
 )
 
 // store process name for when dealing with multiple PROCESS-NAME rules

@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/metacubex/mihomo/component/profile/cachefile"
-	"github.com/metacubex/mihomo/component/trie"
-	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/clash/component/profile/cachefile"
+	"github.com/metacubex/clash/component/trie"
+	C "github.com/metacubex/clash/constant"
 
 	"github.com/metacubex/bbolt"
 	"github.com/stretchr/testify/assert"
@@ -33,7 +33,7 @@ func createCachefileStore(options Options) (*Pool, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	f, err := os.CreateTemp("", "mihomo")
+	f, err := os.CreateTemp("", "clash")
 	if err != nil {
 		return nil, "", err
 	}

@@ -9,8 +9,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/metacubex/mihomo/listener/inner"
-	"github.com/metacubex/mihomo/ntp"
+	"github.com/metacubex/clash/listener/inner"
+	"github.com/metacubex/clash/ntp"
 
 	"github.com/sagernet/reality"
 )

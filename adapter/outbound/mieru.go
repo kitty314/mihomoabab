@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/metacubex/mihomo/component/dialer"
-	"github.com/metacubex/mihomo/component/proxydialer"
-	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/clash/component/dialer"
+	"github.com/metacubex/clash/component/proxydialer"
+	C "github.com/metacubex/clash/constant"
 
 	mieruclient "github.com/enfein/mieru/v3/apis/client"
 	mierumodel "github.com/enfein/mieru/v3/apis/model"

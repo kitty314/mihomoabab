@@ -11,30 +11,30 @@ import (
 	"time"
 	_ "unsafe"
 
-	"github.com/metacubex/mihomo/adapter"
-	"github.com/metacubex/mihomo/adapter/outbound"
-	"github.com/metacubex/mihomo/adapter/outboundgroup"
-	"github.com/metacubex/mihomo/adapter/provider"
-	"github.com/metacubex/mihomo/common/utils"
-	"github.com/metacubex/mihomo/component/auth"
-	"github.com/metacubex/mihomo/component/cidr"
-	"github.com/metacubex/mihomo/component/fakeip"
-	"github.com/metacubex/mihomo/component/geodata"
-	P "github.com/metacubex/mihomo/component/process"
-	"github.com/metacubex/mihomo/component/resolver"
-	"github.com/metacubex/mihomo/component/sniffer"
-	"github.com/metacubex/mihomo/component/trie"
-	C "github.com/metacubex/mihomo/constant"
-	providerTypes "github.com/metacubex/mihomo/constant/provider"
-	snifferTypes "github.com/metacubex/mihomo/constant/sniffer"
-	"github.com/metacubex/mihomo/dns"
-	L "github.com/metacubex/mihomo/listener"
-	LC "github.com/metacubex/mihomo/listener/config"
-	"github.com/metacubex/mihomo/log"
-	R "github.com/metacubex/mihomo/rules"
-	RC "github.com/metacubex/mihomo/rules/common"
-	RP "github.com/metacubex/mihomo/rules/provider"
-	T "github.com/metacubex/mihomo/tunnel"
+	"github.com/metacubex/clash/adapter"
+	"github.com/metacubex/clash/adapter/outbound"
+	"github.com/metacubex/clash/adapter/outboundgroup"
+	"github.com/metacubex/clash/adapter/provider"
+	"github.com/metacubex/clash/common/utils"
+	"github.com/metacubex/clash/component/auth"
+	"github.com/metacubex/clash/component/cidr"
+	"github.com/metacubex/clash/component/fakeip"
+	"github.com/metacubex/clash/component/geodata"
+	P "github.com/metacubex/clash/component/process"
+	"github.com/metacubex/clash/component/resolver"
+	"github.com/metacubex/clash/component/sniffer"
+	"github.com/metacubex/clash/component/trie"
+	C "github.com/metacubex/clash/constant"
+	providerTypes "github.com/metacubex/clash/constant/provider"
+	snifferTypes "github.com/metacubex/clash/constant/sniffer"
+	"github.com/metacubex/clash/dns"
+	L "github.com/metacubex/clash/listener"
+	LC "github.com/metacubex/clash/listener/config"
+	"github.com/metacubex/clash/log"
+	R "github.com/metacubex/clash/rules"
+	RC "github.com/metacubex/clash/rules/common"
+	RP "github.com/metacubex/clash/rules/provider"
+	T "github.com/metacubex/clash/tunnel"
 
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 	"golang.org/x/exp/slices"
@@ -177,7 +177,7 @@ type TLS struct {
 	CustomTrustCert []string
 }
 
-// Config is mihomo config manager
+// Config is clash config manager
 type Config struct {
 	General       *General
 	Controller    *Controller
