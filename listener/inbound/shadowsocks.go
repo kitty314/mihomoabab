@@ -1,10 +1,12 @@
 package inbound
 
 import (
-	C "github.com/metacubex/clash/constant"
-	LC "github.com/metacubex/clash/listener/config"
-	"github.com/metacubex/clash/listener/sing_shadowsocks"
-	"github.com/metacubex/clash/log"
+	"strings"
+
+	C "github.com/metacubex/mihomo/constant"
+	LC "github.com/metacubex/mihomo/listener/config"
+	"github.com/metacubex/mihomo/listener/sing_shadowsocks"
+	"github.com/metacubex/mihomo/log"
 )
 
 type ShadowSocksOption struct {
@@ -52,12 +54,13 @@ func (s *ShadowSocks) Config() C.InboundConfig {
 
 // Address implements constant.InboundListener
 func (s *ShadowSocks) Address() string {
+	var addrList []string
 	if s.l != nil {
 		for _, addr := range s.l.AddrList() {
-			return addr.String()
+			addrList = append(addrList, addr.String())
 		}
 	}
-	return ""
+	return strings.Join(addrList, ",")
 }
 
 // Listen implements constant.InboundListener

@@ -12,7 +12,7 @@ import (
 	"github.com/metacubex/clash/listener/inner"
 	"github.com/metacubex/clash/ntp"
 
-	"github.com/sagernet/reality"
+	"github.com/metacubex/reality"
 )
 
 type Conn = reality.Conn

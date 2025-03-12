@@ -4,12 +4,13 @@ import (
 	"net"
 	"strings"
 
-	"github.com/metacubex/clash/adapter/inbound"
-	N "github.com/metacubex/clash/common/net"
-	C "github.com/metacubex/clash/constant"
-	LC "github.com/metacubex/clash/listener/config"
-	"github.com/metacubex/clash/transport/shadowsocks/core"
-	"github.com/metacubex/clash/transport/socks5"
+	"github.com/metacubex/mihomo/adapter/inbound"
+	N "github.com/metacubex/mihomo/common/net"
+	C "github.com/metacubex/mihomo/constant"
+	LC "github.com/metacubex/mihomo/listener/config"
+	"github.com/metacubex/mihomo/listener/sing"
+	"github.com/metacubex/mihomo/transport/shadowsocks/core"
+	"github.com/metacubex/mihomo/transport/socks5"
 )
 
 type Listener struct {
@@ -18,6 +19,7 @@ type Listener struct {
 	listeners    []net.Listener
 	udpListeners []*UDPListener
 	pickCipher   core.Cipher
+	handler      *sing.ListenerHandler
 }
 
 var _listener *Listener
@@ -28,7 +30,17 @@ func New(config LC.ShadowsocksServer, tunnel C.Tunnel, additions ...inbound.Addi
 		return nil, err
 	}
 
-	sl := &Listener{false, config, nil, nil, pickCipher}
+	h, err := sing.NewListenerHandler(sing.ListenerConfig{
+		Tunnel:    tunnel,
+		Type:      C.SHADOWSOCKS,
+		Additions: additions,
+		MuxOption: config.MuxOption,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	sl := &Listener{false, config, nil, nil, pickCipher, h}
 	_listener = sl
 
 	for _, addr := range strings.Split(config.Listen, ",") {
@@ -107,7 +119,8 @@ func (l *Listener) HandleConn(conn net.Conn, tunnel C.Tunnel, additions ...inbou
 		_ = conn.Close()
 		return
 	}
-	tunnel.HandleTCPConn(inbound.NewSocket(target, conn, C.SHADOWSOCKS, additions...))
+	l.handler.HandleSocket(target, conn, additions...)
+	//tunnel.HandleTCPConn(inbound.NewSocket(target, conn, C.SHADOWSOCKS, additions...))
 }
 
 func HandleShadowSocks(conn net.Conn, tunnel C.Tunnel, additions ...inbound.Addition) bool {
