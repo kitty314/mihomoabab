@@ -174,7 +174,7 @@ func (l *Listener) HandleConn(conn net.Conn, h *sing.ListenerHandler) {
 			return
 		}
 
-		// It seems that mihomo does not implement a connection error reporting mechanism, so we report success directly.
+		// It seems that clash does not implement a connection error reporting mechanism, so we report success directly.
 		err = stream.HandshakeSuccess()
 		if err != nil {
 			return
