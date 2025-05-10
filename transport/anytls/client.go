@@ -7,15 +7,14 @@ import (
 	"net"
 	"time"
 
-	"github.com/metacubex/clash/common/atomic"
-	"github.com/metacubex/clash/common/buf"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/transport/anytls/padding"
-	"github.com/metacubex/clash/transport/anytls/session"
-	"github.com/metacubex/clash/transport/vmess"
+	"github.com/metacubex/mihomo/common/atomic"
+	"github.com/metacubex/mihomo/common/buf"
+	"github.com/metacubex/mihomo/transport/anytls/padding"
+	"github.com/metacubex/mihomo/transport/anytls/session"
+	"github.com/metacubex/mihomo/transport/vmess"
 
-	M "github.com/sagernet/sing/common/metadata"
-	N "github.com/sagernet/sing/common/network"
+	M "github.com/metacubex/sing/common/metadata"
+	N "github.com/metacubex/sing/common/network"
 )
 
 type ClientConfig struct {
@@ -83,12 +82,7 @@ func (c *Client) CreateOutboundTLSConnection(ctx context.Context) (net.Conn, err
 		b.WriteZeroN(paddingLen)
 	}
 
-	getTlsConn := func() (net.Conn, error) {
-		ctx, cancel := context.WithTimeout(ctx, C.DefaultTLSTimeout)
-		defer cancel()
-		return vmess.StreamTLSConn(ctx, conn, c.tlsConfig)
-	}
-	tlsConn, err := getTlsConn()
+	tlsConn, err := vmess.StreamTLSConn(ctx, conn, c.tlsConfig)
 	if err != nil {
 		conn.Close()
 		return nil, err

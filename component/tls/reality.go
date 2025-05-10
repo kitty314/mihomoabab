@@ -26,6 +26,7 @@ import (
 	utls "github.com/metacubex/utls"
 	"golang.org/x/crypto/chacha20poly1305"
 	"golang.org/x/crypto/hkdf"
+	"golang.org/x/exp/slices"
 	"golang.org/x/net/http2"
 )
 
@@ -36,9 +37,8 @@ type RealityConfig struct {
 	ShortID   [RealityMaxShortIDLen]byte
 }
 
-func GetRealityConn(ctx context.Context, conn net.Conn, ClientFingerprint string, tlsConfig *tls.Config, realityConfig *RealityConfig) (net.Conn, error) {
-	retry := 0
-	for fingerprint, exists := GetFingerprint(ClientFingerprint); exists; retry++ {
+func GetRealityConn(ctx context.Context, conn net.Conn, fingerprint UClientHelloID, tlsConfig *tls.Config, realityConfig *RealityConfig) (net.Conn, error) {
+	for retry := 0; ; retry++ {
 		verifier := &realityVerifier{
 			serverName: tlsConfig.ServerName,
 		}
@@ -59,6 +59,27 @@ func GetRealityConn(ctx context.Context, conn net.Conn, ClientFingerprint string
 		if err != nil {
 			return nil, err
 		}
+
+		// ------for X25519MLKEM768 does not work properly with reality-------
+		// Iterate over extensions and check
+		for _, extension := range uConn.Extensions {
+			if ce, ok := extension.(*utls.SupportedCurvesExtension); ok {
+				ce.Curves = slices.DeleteFunc(ce.Curves, func(curveID utls.CurveID) bool {
+					return curveID == utls.X25519MLKEM768
+				})
+			}
+			if ks, ok := extension.(*utls.KeyShareExtension); ok {
+				ks.KeyShares = slices.DeleteFunc(ks.KeyShares, func(share utls.KeyShare) bool {
+					return share.Group == utls.X25519MLKEM768
+				})
+			}
+		}
+		// Rebuild the client hello
+		err = uConn.BuildHandshakeState()
+		if err != nil {
+			return nil, err
+		}
+		// --------------------------------------------------------------------
 
 		hello := uConn.HandshakeState.Hello
 		rawSessionID := hello.Raw[39 : 39+32] // the location of session ID
@@ -129,7 +150,6 @@ func GetRealityConn(ctx context.Context, conn net.Conn, ClientFingerprint string
 
 		return uConn, nil
 	}
-	return nil, errors.New("unknown uTLS fingerprint")
 }
 
 func realityClientFallback(uConn net.Conn, serverName string, fingerprint utls.ClientHelloID) {

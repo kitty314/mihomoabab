@@ -12,22 +12,23 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/metacubex/clash/adapter/inbound"
-	"github.com/metacubex/clash/component/dialer"
-	"github.com/metacubex/clash/component/iface"
-	"github.com/metacubex/clash/component/resolver"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/constant/provider"
-	LC "github.com/metacubex/clash/listener/config"
-	"github.com/metacubex/clash/listener/sing"
-	"github.com/metacubex/clash/log"
+	"github.com/metacubex/mihomo/adapter/inbound"
+	"github.com/metacubex/mihomo/component/dialer"
+	"github.com/metacubex/mihomo/component/iface"
+	"github.com/metacubex/mihomo/component/resolver"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/constant/provider"
+	LC "github.com/metacubex/mihomo/listener/config"
+	"github.com/metacubex/mihomo/listener/sing"
+	"github.com/metacubex/mihomo/log"
+	"golang.org/x/exp/constraints"
 
 	tun "github.com/metacubex/sing-tun"
-	"github.com/metacubex/sing-tun/control"
-	"github.com/sagernet/sing/common"
-	E "github.com/sagernet/sing/common/exceptions"
-	F "github.com/sagernet/sing/common/format"
-	"github.com/sagernet/sing/common/ranges"
+	"github.com/metacubex/sing/common"
+	"github.com/metacubex/sing/common/control"
+	E "github.com/metacubex/sing/common/exceptions"
+	F "github.com/metacubex/sing/common/format"
+	"github.com/metacubex/sing/common/ranges"
 
 	"go4.org/netipx"
 	"golang.org/x/exp/maps"
@@ -211,6 +212,22 @@ func New(options LC.Tun, tunnel C.Tunnel, additions ...inbound.Addition) (l *Lis
 			return nil, E.Cause(err, "parse exclude_uid_range")
 		}
 	}
+	excludeSrcPort := uidToRange(options.ExcludeSrcPort)
+	if len(options.ExcludeSrcPortRange) > 0 {
+		var err error
+		excludeSrcPort, err = parseRange(excludeSrcPort, options.ExcludeSrcPortRange)
+		if err != nil {
+			return nil, E.Cause(err, "parse exclude_src_port_range")
+		}
+	}
+	excludeDstPort := uidToRange(options.ExcludeDstPort)
+	if len(options.ExcludeDstPortRange) > 0 {
+		var err error
+		excludeDstPort, err = parseRange(excludeDstPort, options.ExcludeDstPortRange)
+		if err != nil {
+			return nil, E.Cause(err, "parse exclude_dst_port_range")
+		}
+	}
 
 	var dnsAdds []netip.AddrPort
 
@@ -339,6 +356,8 @@ func New(options LC.Tun, tunnel C.Tunnel, additions ...inbound.Addition) (l *Lis
 		ExcludeInterface:         options.ExcludeInterface,
 		IncludeUID:               includeUID,
 		ExcludeUID:               excludeUID,
+		ExcludeSrcPort:           excludeSrcPort,
+		ExcludeDstPort:           excludeDstPort,
 		IncludeAndroidUser:       options.IncludeAndroidUser,
 		IncludePackage:           options.IncludePackage,
 		ExcludePackage:           options.ExcludePackage,
@@ -361,7 +380,7 @@ func New(options LC.Tun, tunnel C.Tunnel, additions ...inbound.Addition) (l *Lis
 			Logger:                 log.SingLogger,
 			NetworkMonitor:         l.networkUpdateMonitor,
 			InterfaceFinder:        interfaceFinder,
-			TableName:              "clash",
+			TableName:              "mihomo",
 			DisableNFTables:        dErr == nil && disableNFTables,
 			RouteAddressSet:        &l.routeAddressSet,
 			RouteExcludeAddressSet: &l.routeExcludeAddressSet,
@@ -566,13 +585,13 @@ func (d *cDialerInterfaceFinder) FindInterfaceName(destination netip.Addr) strin
 	return "<invalid>"
 }
 
-func uidToRange(uidList []uint32) []ranges.Range[uint32] {
-	return common.Map(uidList, func(uid uint32) ranges.Range[uint32] {
+func uidToRange[T constraints.Integer](uidList []T) []ranges.Range[T] {
+	return common.Map(uidList, func(uid T) ranges.Range[T] {
 		return ranges.NewSingle(uid)
 	})
 }
 
-func parseRange(uidRanges []ranges.Range[uint32], rangeList []string) ([]ranges.Range[uint32], error) {
+func parseRange[T constraints.Integer](uidRanges []ranges.Range[T], rangeList []string) ([]ranges.Range[T], error) {
 	for _, uidRange := range rangeList {
 		if !strings.Contains(uidRange, ":") {
 			return nil, E.New("missing ':' in range: ", uidRange)
@@ -593,7 +612,7 @@ func parseRange(uidRanges []ranges.Range[uint32], rangeList []string) ([]ranges.
 		if err != nil {
 			return nil, E.Cause(err, "parse range end")
 		}
-		uidRanges = append(uidRanges, ranges.New(uint32(start), uint32(end)))
+		uidRanges = append(uidRanges, ranges.New(T(start), T(end)))
 	}
 	return uidRanges, nil
 }

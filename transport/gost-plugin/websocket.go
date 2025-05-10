@@ -6,9 +6,9 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/metacubex/clash/component/ca"
-	"github.com/metacubex/clash/transport/vmess"
-	smux "github.com/sagernet/smux"
+	"github.com/metacubex/mihomo/component/ca"
+	"github.com/metacubex/mihomo/transport/vmess"
+	smux "github.com/metacubex/smux"
 )
 
 // Option is options of gost websocket

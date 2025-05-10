@@ -6,7 +6,7 @@ import (
 	"net/netip"
 	"time"
 
-	"github.com/metacubex/clash/common/singledo"
+	"github.com/metacubex/mihomo/common/singledo"
 
 	"github.com/metacubex/bart"
 )
@@ -80,6 +80,9 @@ func getCache() (*ifaceCache, error) {
 			}
 			cache.ifMap[iface.Name] = ifaceObj
 
+			if iface.Flags&net.FlagUp == 0 {
+				continue // interface down
+			}
 			for _, prefix := range ipNets {
 				cache.ifTable.Insert(prefix, ifaceObj)
 			}

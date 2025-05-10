@@ -9,19 +9,19 @@ import (
 	"net"
 	"strings"
 
-	"github.com/metacubex/clash/adapter/inbound"
-	"github.com/metacubex/clash/common/atomic"
-	"github.com/metacubex/clash/common/buf"
-	N "github.com/metacubex/clash/common/net"
-	C "github.com/metacubex/clash/constant"
-	LC "github.com/metacubex/clash/listener/config"
-	"github.com/metacubex/clash/listener/sing"
-	"github.com/metacubex/clash/transport/anytls/padding"
-	"github.com/metacubex/clash/transport/anytls/session"
+	"github.com/metacubex/mihomo/adapter/inbound"
+	"github.com/metacubex/mihomo/common/atomic"
+	"github.com/metacubex/mihomo/common/buf"
+	"github.com/metacubex/mihomo/component/ca"
+	C "github.com/metacubex/mihomo/constant"
+	LC "github.com/metacubex/mihomo/listener/config"
+	"github.com/metacubex/mihomo/listener/sing"
+	"github.com/metacubex/mihomo/transport/anytls/padding"
+	"github.com/metacubex/mihomo/transport/anytls/session"
 
-	"github.com/sagernet/sing/common/auth"
-	"github.com/sagernet/sing/common/bufio"
-	M "github.com/sagernet/sing/common/metadata"
+	"github.com/metacubex/sing/common/auth"
+	"github.com/metacubex/sing/common/bufio"
+	M "github.com/metacubex/sing/common/metadata"
 )
 
 type Listener struct {
@@ -43,7 +43,7 @@ func New(config LC.AnyTLSServer, tunnel C.Tunnel, additions ...inbound.Addition)
 
 	tlsConfig := &tls.Config{}
 	if config.Certificate != "" && config.PrivateKey != "" {
-		cert, err := N.ParseCert(config.Certificate, config.PrivateKey, C.Path)
+		cert, err := ca.LoadTLSKeyPair(config.Certificate, config.PrivateKey, C.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -85,6 +85,11 @@ func New(config LC.AnyTLSServer, tunnel C.Tunnel, additions ...inbound.Addition)
 		l, err := inbound.Listen("tcp", addr)
 		if err != nil {
 			return nil, err
+		}
+		if len(tlsConfig.Certificates) > 0 {
+			l = tls.NewListener(l, tlsConfig)
+		} else {
+			return nil, errors.New("disallow using AnyTLS without certificates config")
 		}
 		sl.listeners = append(sl.listeners, l)
 
@@ -130,8 +135,6 @@ func (l *Listener) AddrList() (addrList []net.Addr) {
 
 func (l *Listener) HandleConn(conn net.Conn, h *sing.ListenerHandler) {
 	ctx := context.TODO()
-
-	conn = tls.Server(conn, l.tlsConfig)
 	defer conn.Close()
 
 	b := buf.NewPacket()
@@ -174,7 +177,7 @@ func (l *Listener) HandleConn(conn net.Conn, h *sing.ListenerHandler) {
 			return
 		}
 
-		// It seems that clash does not implement a connection error reporting mechanism, so we report success directly.
+		// It seems that mihomo does not implement a connection error reporting mechanism, so we report success directly.
 		err = stream.HandshakeSuccess()
 		if err != nil {
 			return

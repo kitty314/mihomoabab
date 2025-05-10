@@ -9,13 +9,16 @@ import (
 	"net"
 	"time"
 
-	"github.com/metacubex/clash/listener/inner"
-	"github.com/metacubex/clash/ntp"
+	N "github.com/metacubex/mihomo/common/net"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/listener/inner"
+	"github.com/metacubex/mihomo/log"
+	"github.com/metacubex/mihomo/ntp"
 
-	"github.com/metacubex/reality"
+	utls "github.com/metacubex/utls"
 )
 
-type Conn = reality.Conn
+type Conn = utls.Conn
 
 type Config struct {
 	Dest              string
@@ -26,13 +29,14 @@ type Config struct {
 	Proxy             string
 }
 
-func (c Config) Build() (*Builder, error) {
-	realityConfig := &reality.Config{}
+func (c Config) Build(tunnel C.Tunnel) (*Builder, error) {
+	realityConfig := &utls.RealityConfig{}
 	realityConfig.SessionTicketsDisabled = true
 	realityConfig.Type = "tcp"
 	realityConfig.Dest = c.Dest
 	realityConfig.Time = ntp.Now
 	realityConfig.ServerNames = make(map[string]bool)
+	realityConfig.Log = log.Debugln
 	for _, it := range c.ServerNames {
 		realityConfig.ServerNames[it] = true
 	}
@@ -50,7 +54,11 @@ func (c Config) Build() (*Builder, error) {
 	realityConfig.ShortIds = make(map[[8]byte]bool)
 	for i, shortIDString := range c.ShortID {
 		var shortID [8]byte
-		decodedLen, err := hex.Decode(shortID[:], []byte(shortIDString))
+		decodedLen := hex.DecodedLen(len(shortIDString))
+		if decodedLen > 8 {
+			return nil, fmt.Errorf("invalid short_id[%d]: %s", i, shortIDString)
+		}
+		decodedLen, err = hex.Decode(shortID[:], []byte(shortIDString))
 		if err != nil {
 			return nil, fmt.Errorf("decode short_id[%d] '%s': %w", i, shortIDString, err)
 		}
@@ -61,26 +69,32 @@ func (c Config) Build() (*Builder, error) {
 	}
 
 	realityConfig.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
-		return inner.HandleTcp(address, c.Proxy)
+		return inner.HandleTcp(tunnel, address, c.Proxy)
 	}
 
 	return &Builder{realityConfig}, nil
 }
 
 type Builder struct {
-	realityConfig *reality.Config
+	realityConfig *utls.RealityConfig
 }
 
 func (b Builder) NewListener(l net.Listener) net.Listener {
-	l = reality.NewListener(l, b.realityConfig)
-	// Due to low implementation quality, the reality server intercepted half close and caused memory leaks.
-	// We fixed it by calling Close() directly.
-	l = realityListenerWrapper{l}
-	return l
+	return N.NewHandleContextListener(context.Background(), l, func(ctx context.Context, conn net.Conn) (net.Conn, error) {
+		c, err := utls.RealityServer(ctx, conn, b.realityConfig)
+		if err != nil {
+			return nil, err
+		}
+		// Due to low implementation quality, the reality server intercepted half-close and caused memory leaks.
+		// We fixed it by calling Close() directly.
+		return realityConnWrapper{c}, nil
+	}, func(a any) {
+		log.Errorln("reality server panic: %s", a)
+	})
 }
 
 type realityConnWrapper struct {
-	*reality.Conn
+	*utls.Conn
 }
 
 func (c realityConnWrapper) Upstream() any {
@@ -89,16 +103,4 @@ func (c realityConnWrapper) Upstream() any {
 
 func (c realityConnWrapper) CloseWrite() error {
 	return c.Close()
-}
-
-type realityListenerWrapper struct {
-	net.Listener
-}
-
-func (l realityListenerWrapper) Accept() (net.Conn, error) {
-	c, err := l.Listener.Accept()
-	if err != nil {
-		return nil, err
-	}
-	return realityConnWrapper{c.(*reality.Conn)}, nil
 }

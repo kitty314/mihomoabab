@@ -14,15 +14,15 @@ import (
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/log"
 
+	mux "github.com/metacubex/sing-mux"
 	vmess "github.com/metacubex/sing-vmess"
-	mux "github.com/sagernet/sing-mux"
-	"github.com/sagernet/sing/common/buf"
-	"github.com/sagernet/sing/common/bufio"
-	"github.com/sagernet/sing/common/bufio/deadline"
-	E "github.com/sagernet/sing/common/exceptions"
-	M "github.com/sagernet/sing/common/metadata"
-	"github.com/sagernet/sing/common/network"
-	"github.com/sagernet/sing/common/uot"
+	"github.com/metacubex/sing/common/buf"
+	"github.com/metacubex/sing/common/bufio"
+	"github.com/metacubex/sing/common/bufio/deadline"
+	E "github.com/metacubex/sing/common/exceptions"
+	M "github.com/metacubex/sing/common/metadata"
+	"github.com/metacubex/sing/common/network"
+	"github.com/metacubex/sing/common/uot"
 )
 
 const UDPTimeout = 5 * time.Minute
@@ -72,7 +72,7 @@ func NewListenerHandler(lc ListenerConfig) (h *ListenerHandler, err error) {
 		NewStreamContext: func(ctx context.Context, conn net.Conn) context.Context {
 			return ctx
 		},
-		Logger:  log.SingLogger,
+		Logger:  log.SingInfoToDebugLogger, // convert sing-mux info log to debug
 		Handler: h,
 		Padding: lc.MuxOption.Padding,
 		Brutal: mux.BrutalOptions{

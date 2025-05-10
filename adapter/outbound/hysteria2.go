@@ -6,24 +6,23 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"runtime"
 	"strconv"
 	"time"
 
-	CN "github.com/metacubex/clash/common/net"
-	"github.com/metacubex/clash/common/utils"
-	"github.com/metacubex/clash/component/ca"
-	"github.com/metacubex/clash/component/dialer"
-	"github.com/metacubex/clash/component/proxydialer"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/log"
-	tuicCommon "github.com/metacubex/clash/transport/tuic/common"
-
-	"github.com/metacubex/sing-quic/hysteria2"
+	CN "github.com/metacubex/mihomo/common/net"
+	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/component/ca"
+	"github.com/metacubex/mihomo/component/dialer"
+	"github.com/metacubex/mihomo/component/proxydialer"
+	tlsC "github.com/metacubex/mihomo/component/tls"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/log"
+	tuicCommon "github.com/metacubex/mihomo/transport/tuic/common"
 
 	"github.com/metacubex/quic-go"
 	"github.com/metacubex/randv2"
-	M "github.com/sagernet/sing/common/metadata"
+	"github.com/metacubex/sing-quic/hysteria2"
+	M "github.com/metacubex/sing/common/metadata"
 )
 
 func init() {
@@ -39,8 +38,6 @@ type Hysteria2 struct {
 	option *Hysteria2Option
 	client *hysteria2.Client
 	dialer proxydialer.SingDialer
-
-	closeCh chan struct{} // for test
 }
 
 type Hysteria2Option struct {
@@ -71,19 +68,15 @@ type Hysteria2Option struct {
 	MaxConnectionReceiveWindow     uint64 `proxy:"max-connection-receive-window,omitempty"`
 }
 
-func (h *Hysteria2) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
-	options := h.Base.DialOptions(opts...)
-	h.dialer.SetDialer(dialer.NewDialer(options...))
+func (h *Hysteria2) DialContext(ctx context.Context, metadata *C.Metadata) (_ C.Conn, err error) {
 	c, err := h.client.DialConn(ctx, M.ParseSocksaddrHostPort(metadata.String(), metadata.DstPort))
 	if err != nil {
 		return nil, err
 	}
-	return NewConn(CN.NewRefConn(c, h), h), nil
+	return NewConn(c, h), nil
 }
 
-func (h *Hysteria2) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.PacketConn, err error) {
-	options := h.Base.DialOptions(opts...)
-	h.dialer.SetDialer(dialer.NewDialer(options...))
+func (h *Hysteria2) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (_ C.PacketConn, err error) {
 	pc, err := h.client.ListenPacket(ctx)
 	if err != nil {
 		return nil, err
@@ -91,16 +84,15 @@ func (h *Hysteria2) ListenPacketContext(ctx context.Context, metadata *C.Metadat
 	if pc == nil {
 		return nil, errors.New("packetConn is nil")
 	}
-	return newPacketConn(CN.NewRefPacketConn(CN.NewThreadSafePacketConn(pc), h), h), nil
+	return newPacketConn(CN.NewThreadSafePacketConn(pc), h), nil
 }
 
-func closeHysteria2(h *Hysteria2) {
+// Close implements C.ProxyAdapter
+func (h *Hysteria2) Close() error {
 	if h.client != nil {
-		_ = h.client.CloseWithError(errors.New("proxy removed"))
+		return h.client.CloseWithError(errors.New("proxy removed"))
 	}
-	if h.closeCh != nil {
-		close(h.closeCh)
-	}
+	return nil
 }
 
 // ProxyInfo implements C.ProxyAdapter
@@ -112,6 +104,22 @@ func (h *Hysteria2) ProxyInfo() C.ProxyInfo {
 
 func NewHysteria2(option Hysteria2Option) (*Hysteria2, error) {
 	addr := net.JoinHostPort(option.Server, strconv.Itoa(option.Port))
+	outbound := &Hysteria2{
+		Base: &Base{
+			name:   option.Name,
+			addr:   addr,
+			tp:     C.Hysteria2,
+			udp:    true,
+			iface:  option.Interface,
+			rmark:  option.RoutingMark,
+			prefer: C.NewDNSPrefer(option.IPVersion),
+		},
+		option: &option,
+	}
+
+	singDialer := proxydialer.NewByNameSingDialer(option.DialerProxy, dialer.NewDialer(outbound.DialOptions()...))
+	outbound.dialer = singDialer
+
 	var salamanderPassword string
 	if len(option.Obfs) > 0 {
 		if option.ObfsPassword == "" {
@@ -159,8 +167,6 @@ func NewHysteria2(option Hysteria2Option) (*Hysteria2, error) {
 		MaxConnectionReceiveWindow:     option.MaxConnectionReceiveWindow,
 	}
 
-	singDialer := proxydialer.NewByNameSingDialer(option.DialerProxy, dialer.NewDialer())
-
 	clientOptions := hysteria2.ClientOptions{
 		Context:            context.TODO(),
 		Dialer:             singDialer,
@@ -169,13 +175,13 @@ func NewHysteria2(option Hysteria2Option) (*Hysteria2, error) {
 		ReceiveBPS:         StringToBps(option.Down),
 		SalamanderPassword: salamanderPassword,
 		Password:           option.Password,
-		TLSConfig:          tlsConfig,
+		TLSConfig:          tlsC.UConfig(tlsConfig),
 		QUICConfig:         quicConfig,
 		UDPDisabled:        false,
 		CWND:               option.CWND,
 		UdpMTU:             option.UdpMTU,
 		ServerAddress: func(ctx context.Context) (*net.UDPAddr, error) {
-			return resolveUDPAddrWithPrefer(ctx, "udp", addr, C.NewDNSPrefer(option.IPVersion))
+			return resolveUDPAddr(ctx, "udp", addr, C.NewDNSPrefer(option.IPVersion))
 		},
 	}
 
@@ -192,7 +198,7 @@ func NewHysteria2(option Hysteria2Option) (*Hysteria2, error) {
 		})
 		if len(serverAddress) > 0 {
 			clientOptions.ServerAddress = func(ctx context.Context) (*net.UDPAddr, error) {
-				return resolveUDPAddrWithPrefer(ctx, "udp", serverAddress[randv2.IntN(len(serverAddress))], C.NewDNSPrefer(option.IPVersion))
+				return resolveUDPAddr(ctx, "udp", serverAddress[randv2.IntN(len(serverAddress))], C.NewDNSPrefer(option.IPVersion))
 			}
 
 			if option.HopInterval == 0 {
@@ -211,22 +217,7 @@ func NewHysteria2(option Hysteria2Option) (*Hysteria2, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	outbound := &Hysteria2{
-		Base: &Base{
-			name:   option.Name,
-			addr:   addr,
-			tp:     C.Hysteria2,
-			udp:    true,
-			iface:  option.Interface,
-			rmark:  option.RoutingMark,
-			prefer: C.NewDNSPrefer(option.IPVersion),
-		},
-		option: &option,
-		client: client,
-		dialer: singDialer,
-	}
-	runtime.SetFinalizer(outbound, closeHysteria2)
+	outbound.client = client
 
 	return outbound, nil
 }

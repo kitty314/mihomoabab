@@ -7,9 +7,9 @@ import (
 
 	"github.com/metacubex/clash/common/net/deadline"
 
-	"github.com/sagernet/sing/common"
-	"github.com/sagernet/sing/common/bufio"
-	"github.com/sagernet/sing/common/network"
+	"github.com/metacubex/sing/common"
+	"github.com/metacubex/sing/common/bufio"
+	"github.com/metacubex/sing/common/network"
 )
 
 var NewExtendedConn = bufio.NewExtendedConn

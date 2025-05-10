@@ -6,13 +6,11 @@ import (
 	"errors"
 	"time"
 
-	"github.com/metacubex/clash/adapter/outbound"
-	"github.com/metacubex/clash/common/callback"
-	N "github.com/metacubex/clash/common/net"
-	"github.com/metacubex/clash/common/utils"
-	"github.com/metacubex/clash/component/dialer"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/constant/provider"
+	"github.com/metacubex/mihomo/common/callback"
+	N "github.com/metacubex/mihomo/common/net"
+	"github.com/metacubex/mihomo/common/utils"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/constant/provider"
 )
 
 type Fallback struct {
@@ -31,9 +29,9 @@ func (f *Fallback) Now() string {
 }
 
 // DialContext implements C.ProxyAdapter
-func (f *Fallback) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.Conn, error) {
+func (f *Fallback) DialContext(ctx context.Context, metadata *C.Metadata) (C.Conn, error) {
 	proxy := f.findAliveProxy(true)
-	c, err := proxy.DialContext(ctx, metadata, f.Base.DialOptions(opts...)...)
+	c, err := proxy.DialContext(ctx, metadata)
 	if err == nil {
 		c.AppendToChains(f)
 	} else {
@@ -54,9 +52,9 @@ func (f *Fallback) DialContext(ctx context.Context, metadata *C.Metadata, opts .
 }
 
 // ListenPacketContext implements C.ProxyAdapter
-func (f *Fallback) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.PacketConn, error) {
+func (f *Fallback) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (C.PacketConn, error) {
 	proxy := f.findAliveProxy(true)
-	pc, err := proxy.ListenPacketContext(ctx, metadata, f.Base.DialOptions(opts...)...)
+	pc, err := proxy.ListenPacketContext(ctx, metadata)
 	if err == nil {
 		pc.AppendToChains(f)
 	}
@@ -155,18 +153,14 @@ func (f *Fallback) ForceSet(name string) {
 func NewFallback(option *GroupCommonOption, providers []provider.ProxyProvider) *Fallback {
 	return &Fallback{
 		GroupBase: NewGroupBase(GroupBaseOption{
-			outbound.BaseOption{
-				Name:        option.Name,
-				Type:        C.Fallback,
-				Interface:   option.Interface,
-				RoutingMark: option.RoutingMark,
-			},
-			option.Filter,
-			option.ExcludeFilter,
-			option.ExcludeType,
-			option.TestTimeout,
-			option.MaxFailedTimes,
-			providers,
+			Name:           option.Name,
+			Type:           C.Fallback,
+			Filter:         option.Filter,
+			ExcludeFilter:  option.ExcludeFilter,
+			ExcludeType:    option.ExcludeType,
+			TestTimeout:    option.TestTimeout,
+			MaxFailedTimes: option.MaxFailedTimes,
+			Providers:      providers,
 		}),
 		disableUDP:     option.DisableUDP,
 		testUrl:        option.URL,

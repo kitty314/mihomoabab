@@ -9,19 +9,19 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/metacubex/clash/adapter/inbound"
-	N "github.com/metacubex/clash/common/net"
-	C "github.com/metacubex/clash/constant"
-	LC "github.com/metacubex/clash/listener/config"
-	"github.com/metacubex/clash/listener/reality"
-	"github.com/metacubex/clash/listener/sing"
-	"github.com/metacubex/clash/ntp"
-	"github.com/metacubex/clash/transport/gun"
-	clashVMess "github.com/metacubex/clash/transport/vmess"
+	"github.com/metacubex/mihomo/adapter/inbound"
+	"github.com/metacubex/mihomo/component/ca"
+	C "github.com/metacubex/mihomo/constant"
+	LC "github.com/metacubex/mihomo/listener/config"
+	"github.com/metacubex/mihomo/listener/reality"
+	"github.com/metacubex/mihomo/listener/sing"
+	"github.com/metacubex/mihomo/ntp"
+	"github.com/metacubex/mihomo/transport/gun"
+	mihomoVMess "github.com/metacubex/mihomo/transport/vmess"
 
 	vmess "github.com/metacubex/sing-vmess"
-	"github.com/sagernet/sing/common"
-	"github.com/sagernet/sing/common/metadata"
+	"github.com/metacubex/sing/common"
+	"github.com/metacubex/sing/common/metadata"
 )
 
 type Listener struct {
@@ -80,7 +80,7 @@ func New(config LC.VmessServer, tunnel C.Tunnel, additions ...inbound.Addition) 
 	var httpHandler http.Handler
 
 	if config.Certificate != "" && config.PrivateKey != "" {
-		cert, err := N.ParseCert(config.Certificate, config.PrivateKey, C.Path)
+		cert, err := ca.LoadTLSKeyPair(config.Certificate, config.PrivateKey, C.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -90,7 +90,7 @@ func New(config LC.VmessServer, tunnel C.Tunnel, additions ...inbound.Addition) 
 		if tlsConfig.Certificates != nil {
 			return nil, errors.New("certificate is unavailable in reality")
 		}
-		realityBuilder, err = config.RealityConfig.Build()
+		realityBuilder, err = config.RealityConfig.Build(tunnel)
 		if err != nil {
 			return nil, err
 		}
@@ -98,7 +98,7 @@ func New(config LC.VmessServer, tunnel C.Tunnel, additions ...inbound.Addition) 
 	if config.WsPath != "" {
 		httpMux := http.NewServeMux()
 		httpMux.HandleFunc(config.WsPath, func(w http.ResponseWriter, r *http.Request) {
-			conn, err := clashVMess.StreamUpgradedWebsocketConn(w, r)
+			conn, err := mihomoVMess.StreamUpgradedWebsocketConn(w, r)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 				return
@@ -187,7 +187,7 @@ func (l *Listener) HandleConn(conn net.Conn, tunnel C.Tunnel, additions ...inbou
 	ctx := sing.WithAdditions(context.TODO(), additions...)
 	err := l.service.NewConnection(ctx, conn, metadata.Metadata{
 		Protocol: "vmess",
-		Source:   metadata.ParseSocksaddr(conn.RemoteAddr().String()),
+		Source:   metadata.SocksaddrFromNet(conn.RemoteAddr()),
 	})
 	if err != nil {
 		_ = conn.Close()

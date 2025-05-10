@@ -4,9 +4,9 @@ import (
 	"net"
 	"net/netip"
 
-	"github.com/metacubex/clash/component/iface"
+	"github.com/metacubex/mihomo/component/iface"
 
-	"github.com/metacubex/sing-tun/control"
+	"github.com/metacubex/sing/common/control"
 )
 
 type defaultInterfaceFinder struct{}

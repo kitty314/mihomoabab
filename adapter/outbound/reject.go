@@ -6,9 +6,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/metacubex/clash/common/buf"
-	"github.com/metacubex/clash/component/dialer"
-	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/mihomo/common/buf"
+	C "github.com/metacubex/mihomo/constant"
 )
 
 type Reject struct {
@@ -21,7 +20,7 @@ type RejectOption struct {
 }
 
 // DialContext implements C.ProxyAdapter
-func (r *Reject) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.Conn, error) {
+func (r *Reject) DialContext(ctx context.Context, metadata *C.Metadata) (C.Conn, error) {
 	if r.drop {
 		return NewConn(dropConn{}, r), nil
 	}
@@ -29,7 +28,7 @@ func (r *Reject) DialContext(ctx context.Context, metadata *C.Metadata, opts ...
 }
 
 // ListenPacketContext implements C.ProxyAdapter
-func (r *Reject) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.PacketConn, error) {
+func (r *Reject) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (C.PacketConn, error) {
 	return newPacketConn(&nopPacketConn{}, r), nil
 }
 

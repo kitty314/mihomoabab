@@ -5,13 +5,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/metacubex/clash/common/lru"
-	"github.com/metacubex/clash/common/nnip"
-	"github.com/metacubex/clash/component/fakeip"
-	R "github.com/metacubex/clash/component/resolver"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/context"
-	"github.com/metacubex/clash/log"
+	"github.com/metacubex/mihomo/common/lru"
+	"github.com/metacubex/mihomo/component/fakeip"
+	R "github.com/metacubex/mihomo/component/resolver"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/context"
+	"github.com/metacubex/mihomo/log"
 
 	D "github.com/miekg/dns"
 )
@@ -120,14 +119,21 @@ func withMapping(mapping *lru.LruCache[netip.Addr, string]) middleware {
 
 				switch a := ans.(type) {
 				case *D.A:
-					ip = nnip.IpToAddr(a.A)
+					ip, _ = netip.AddrFromSlice(a.A)
 					ttl = a.Hdr.Ttl
 				case *D.AAAA:
-					ip = nnip.IpToAddr(a.AAAA)
+					ip, _ = netip.AddrFromSlice(a.AAAA)
 					ttl = a.Hdr.Ttl
 				default:
 					continue
 				}
+				if !ip.IsValid() {
+					continue
+				}
+				if !ip.IsGlobalUnicast() {
+					continue
+				}
+				ip = ip.Unmap()
 
 				if ttl < 1 {
 					ttl = 1

@@ -14,12 +14,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/metacubex/clash/adapter/inbound"
-	CN "github.com/metacubex/clash/common/net"
-	"github.com/metacubex/clash/common/utils"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/log"
-	"github.com/metacubex/clash/tunnel/statistic"
+	"github.com/metacubex/mihomo/adapter/inbound"
+	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/component/ca"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/log"
+	"github.com/metacubex/mihomo/tunnel/statistic"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -186,7 +186,7 @@ func startTLS(cfg *Config) {
 
 	// handle tlsAddr
 	if len(cfg.TLSAddr) > 0 {
-		c, err := CN.ParseCert(cfg.Certificate, cfg.PrivateKey, C.Path)
+		c, err := ca.LoadTLSKeyPair(cfg.Certificate, cfg.PrivateKey, C.Path)
 		if err != nil {
 			log.Errorln("External controller tls listen error: %s", err)
 			return
@@ -327,7 +327,7 @@ func authentication(secret string) func(http.Handler) http.Handler {
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {
-	render.JSON(w, r, render.M{"hello": "clash"})
+	render.JSON(w, r, render.M{"hello": "mihomo"})
 }
 
 func traffic(w http.ResponseWriter, r *http.Request) {

@@ -5,17 +5,18 @@ import (
 	"errors"
 	"net"
 
-	"github.com/metacubex/clash/adapter/inbound"
-	N "github.com/metacubex/clash/common/net"
-	"github.com/metacubex/clash/component/auth"
-	C "github.com/metacubex/clash/constant"
-	authStore "github.com/metacubex/clash/listener/auth"
-	LC "github.com/metacubex/clash/listener/config"
-	"github.com/metacubex/clash/listener/http"
-	"github.com/metacubex/clash/listener/reality"
-	"github.com/metacubex/clash/listener/socks"
-	"github.com/metacubex/clash/transport/socks4"
-	"github.com/metacubex/clash/transport/socks5"
+	"github.com/metacubex/mihomo/adapter/inbound"
+	N "github.com/metacubex/mihomo/common/net"
+	"github.com/metacubex/mihomo/component/auth"
+	"github.com/metacubex/mihomo/component/ca"
+	C "github.com/metacubex/mihomo/constant"
+	authStore "github.com/metacubex/mihomo/listener/auth"
+	LC "github.com/metacubex/mihomo/listener/config"
+	"github.com/metacubex/mihomo/listener/http"
+	"github.com/metacubex/mihomo/listener/reality"
+	"github.com/metacubex/mihomo/listener/socks"
+	"github.com/metacubex/mihomo/transport/socks4"
+	"github.com/metacubex/mihomo/transport/socks5"
 )
 
 type Listener struct {
@@ -63,7 +64,7 @@ func NewWithConfig(config LC.AuthServer, tunnel C.Tunnel, additions ...inbound.A
 	var realityBuilder *reality.Builder
 
 	if config.Certificate != "" && config.PrivateKey != "" {
-		cert, err := N.ParseCert(config.Certificate, config.PrivateKey, C.Path)
+		cert, err := ca.LoadTLSKeyPair(config.Certificate, config.PrivateKey, C.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -73,7 +74,7 @@ func NewWithConfig(config LC.AuthServer, tunnel C.Tunnel, additions ...inbound.A
 		if tlsConfig.Certificates != nil {
 			return nil, errors.New("certificate is unavailable in reality")
 		}
-		realityBuilder, err = config.RealityConfig.Build()
+		realityBuilder, err = config.RealityConfig.Build(tunnel)
 		if err != nil {
 			return nil, err
 		}
