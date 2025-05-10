@@ -9,11 +9,11 @@ import (
 	"net"
 	"time"
 
-	N "github.com/metacubex/mihomo/common/net"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/listener/inner"
-	"github.com/metacubex/mihomo/log"
-	"github.com/metacubex/mihomo/ntp"
+	N "github.com/metacubex/clash/common/net"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/listener/inner"
+	"github.com/metacubex/clash/log"
+	"github.com/metacubex/clash/ntp"
 
 	utls "github.com/metacubex/utls"
 )

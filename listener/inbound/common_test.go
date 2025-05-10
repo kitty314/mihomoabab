@@ -14,12 +14,12 @@ import (
 	"testing"
 	"time"
 
-	N "github.com/metacubex/mihomo/common/net"
-	"github.com/metacubex/mihomo/common/utils"
-	"github.com/metacubex/mihomo/component/ca"
-	"github.com/metacubex/mihomo/component/dialer"
-	"github.com/metacubex/mihomo/component/generater"
-	C "github.com/metacubex/mihomo/constant"
+	N "github.com/metacubex/clash/common/net"
+	"github.com/metacubex/clash/common/utils"
+	"github.com/metacubex/clash/component/ca"
+	"github.com/metacubex/clash/component/dialer"
+	"github.com/metacubex/clash/component/generater"
+	C "github.com/metacubex/clash/constant"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"

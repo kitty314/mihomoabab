@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/metacubex/mihomo/adapter/outbound"
-	"github.com/metacubex/mihomo/listener/inbound"
-	shadowtls "github.com/metacubex/mihomo/transport/sing-shadowtls"
+	"github.com/metacubex/clash/adapter/outbound"
+	"github.com/metacubex/clash/listener/inbound"
+	shadowtls "github.com/metacubex/clash/transport/sing-shadowtls"
 
 	shadowsocks "github.com/metacubex/sing-shadowsocks"
 	"github.com/metacubex/sing-shadowsocks/shadowaead"

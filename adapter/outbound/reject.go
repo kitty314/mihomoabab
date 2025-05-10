@@ -6,8 +6,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/metacubex/mihomo/common/buf"
-	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/clash/common/buf"
+	C "github.com/metacubex/clash/constant"
 )
 
 type Reject struct {

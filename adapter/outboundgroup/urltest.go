@@ -6,12 +6,12 @@ import (
 	"errors"
 	"time"
 
-	"github.com/metacubex/mihomo/common/callback"
-	N "github.com/metacubex/mihomo/common/net"
-	"github.com/metacubex/mihomo/common/singledo"
-	"github.com/metacubex/mihomo/common/utils"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/constant/provider"
+	"github.com/metacubex/clash/common/callback"
+	N "github.com/metacubex/clash/common/net"
+	"github.com/metacubex/clash/common/singledo"
+	"github.com/metacubex/clash/common/utils"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/constant/provider"
 )
 
 type urlTestOption func(*URLTest)
