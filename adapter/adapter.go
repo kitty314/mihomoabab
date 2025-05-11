@@ -13,13 +13,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/metacubex/mihomo/common/atomic"
-	"github.com/metacubex/mihomo/common/queue"
-	"github.com/metacubex/mihomo/common/utils"
-	"github.com/metacubex/mihomo/component/ca"
-	"github.com/metacubex/mihomo/component/dialer"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/log"
+	"github.com/metacubex/clash/common/atomic"
+	"github.com/metacubex/clash/common/queue"
+	"github.com/metacubex/clash/common/utils"
+	"github.com/metacubex/clash/component/ca"
+	"github.com/metacubex/clash/component/dialer"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/log"
 	"github.com/puzpuzpuz/xsync/v3"
 )
 

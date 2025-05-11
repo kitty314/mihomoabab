@@ -3,9 +3,9 @@ package adapter
 import (
 	"fmt"
 
-	"github.com/metacubex/mihomo/adapter/outbound"
-	"github.com/metacubex/mihomo/common/structure"
-	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/clash/adapter/outbound"
+	"github.com/metacubex/clash/common/structure"
+	C "github.com/metacubex/clash/constant"
 )
 
 func ParseProxy(mapping map[string]any) (C.Proxy, error) {

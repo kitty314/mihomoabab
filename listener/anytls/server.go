@@ -9,15 +9,15 @@ import (
 	"net"
 	"strings"
 
-	"github.com/metacubex/mihomo/adapter/inbound"
-	"github.com/metacubex/mihomo/common/atomic"
-	"github.com/metacubex/mihomo/common/buf"
-	N "github.com/metacubex/mihomo/common/net"
-	C "github.com/metacubex/mihomo/constant"
-	LC "github.com/metacubex/mihomo/listener/config"
-	"github.com/metacubex/mihomo/listener/sing"
-	"github.com/metacubex/mihomo/transport/anytls/padding"
-	"github.com/metacubex/mihomo/transport/anytls/session"
+	"github.com/metacubex/clash/adapter/inbound"
+	"github.com/metacubex/clash/common/atomic"
+	"github.com/metacubex/clash/common/buf"
+	N "github.com/metacubex/clash/common/net"
+	C "github.com/metacubex/clash/constant"
+	LC "github.com/metacubex/clash/listener/config"
+	"github.com/metacubex/clash/listener/sing"
+	"github.com/metacubex/clash/transport/anytls/padding"
+	"github.com/metacubex/clash/transport/anytls/session"
 
 	"github.com/sagernet/sing/common/auth"
 	"github.com/sagernet/sing/common/bufio"
@@ -177,7 +177,7 @@ func (l *Listener) HandleConn(conn net.Conn, h *sing.ListenerHandler) {
 			return
 		}
 
-		// It seems that mihomo does not implement a connection error reporting mechanism, so we report success directly.
+		// It seems that clash does not implement a connection error reporting mechanism, so we report success directly.
 		err = stream.HandshakeSuccess()
 		if err != nil {
 			return

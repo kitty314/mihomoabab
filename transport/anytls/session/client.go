@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/mihomo/common/atomic"
-	"github.com/metacubex/mihomo/transport/anytls/padding"
-	"github.com/metacubex/mihomo/transport/anytls/skiplist"
-	"github.com/metacubex/mihomo/transport/anytls/util"
+	"github.com/metacubex/clash/common/atomic"
+	"github.com/metacubex/clash/transport/anytls/padding"
+	"github.com/metacubex/clash/transport/anytls/skiplist"
+	"github.com/metacubex/clash/transport/anytls/util"
 )
 
 type Client struct {

@@ -6,8 +6,8 @@ import (
 	"net/netip"
 	"strings"
 
-	"github.com/metacubex/mihomo/adapter/outboundgroup"
-	"github.com/metacubex/mihomo/common/structure"
+	"github.com/metacubex/clash/adapter/outboundgroup"
+	"github.com/metacubex/clash/common/structure"
 )
 
 func trimArr(arr []string) (r []string) {

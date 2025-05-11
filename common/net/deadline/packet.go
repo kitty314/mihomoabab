@@ -6,8 +6,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/metacubex/mihomo/common/atomic"
-	"github.com/metacubex/mihomo/common/net/packet"
+	"github.com/metacubex/clash/common/atomic"
+	"github.com/metacubex/clash/common/net/packet"
 )
 
 type readResult struct {
