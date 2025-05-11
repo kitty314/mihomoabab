@@ -11,10 +11,10 @@ import (
 	"strings"
 	"sync"
 
-	N "github.com/metacubex/clash/common/net"
-	"github.com/metacubex/clash/component/dialer"
-	"github.com/metacubex/clash/component/proxydialer"
-	C "github.com/metacubex/clash/constant"
+	N "github.com/metacubex/mihomo/common/net"
+	"github.com/metacubex/mihomo/component/dialer"
+	"github.com/metacubex/mihomo/component/proxydialer"
+	C "github.com/metacubex/mihomo/constant"
 
 	"github.com/metacubex/randv2"
 	"golang.org/x/crypto/ssh"
@@ -43,8 +43,8 @@ type SshOption struct {
 	HostKeyAlgorithms    []string `proxy:"host-key-algorithms,omitempty"`
 }
 
-func (s *Ssh) DialContext(ctx context.Context, metadata *C.Metadata) (_ C.Conn, err error) {
-	var cDialer C.Dialer = dialer.NewDialer(s.DialOptions()...)
+func (s *Ssh) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
+	var cDialer C.Dialer = dialer.NewDialer(s.Base.DialOptions(opts...)...)
 	if len(s.option.DialerProxy) > 0 {
 		cDialer, err = proxydialer.NewByName(s.option.DialerProxy, cDialer)
 		if err != nil {
@@ -136,11 +136,7 @@ func NewSsh(option SshOption) (*Ssh, error) {
 		if strings.Contains(option.PrivateKey, "PRIVATE KEY") {
 			b = []byte(option.PrivateKey)
 		} else {
-			path := C.Path.Resolve(option.PrivateKey)
-			if !C.Path.IsSafePath(path) {
-				return nil, fmt.Errorf("path is not subpath of home directory: %s", path)
-			}
-			b, err = os.ReadFile(path)
+			b, err = os.ReadFile(C.Path.Resolve(option.PrivateKey))
 			if err != nil {
 				return nil, err
 			}

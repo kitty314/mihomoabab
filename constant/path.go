@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/metacubex/clash/common/utils"
-	"github.com/metacubex/clash/constant/features"
+	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/constant/features"
 )
 
-const Name = "clash"
+const Name = "mihomo"
 
 var (
 	GeositeName = "GeoSite.dat"
@@ -21,8 +21,8 @@ var (
 
 // Path is used to get the configuration path
 //
-// on Unix systems, `$HOME/.config/clash`.
-// on Windows, `%USERPROFILE%/.config/clash`.
+// on Unix systems, `$HOME/.config/mihomo`.
+// on Windows, `%USERPROFILE%/.config/mihomo`.
 var Path = func() *path {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -37,23 +37,13 @@ var Path = func() *path {
 		}
 	}
 
-	var safePaths []string
-	for _, safePath := range filepath.SplitList(os.Getenv("SAFE_PATHS")) {
-		safePath = strings.TrimSpace(safePath)
-		if len(safePath) == 0 {
-			continue
-		}
-		safePaths = append(safePaths, safePath)
-	}
-
-	return &path{homeDir: homeDir, configFile: "config.yaml", allowUnsafePath: allowUnsafePath, safePaths: safePaths}
+	return &path{homeDir: homeDir, configFile: "config.yaml", allowUnsafePath: allowUnsafePath}
 }()
 
 type path struct {
 	homeDir         string
 	configFile      string
 	allowUnsafePath bool
-	safePaths       []string
 }
 
 // SetHomeDir is used to set the configuration path
@@ -82,22 +72,19 @@ func (p *path) Resolve(path string) string {
 	return path
 }
 
-// IsSafePath return true if path is a subpath of homedir (or in the SAFE_PATHS environment variable)
+// IsSafePath return true if path is a subpath of homedir
 func (p *path) IsSafePath(path string) bool {
 	if p.allowUnsafePath || features.CMFA {
 		return true
 	}
 	homedir := p.HomeDir()
 	path = p.Resolve(path)
-	safePaths := append([]string{homedir}, p.safePaths...) // add homedir to safePaths
-	for _, safePath := range safePaths {
-		if rel, err := filepath.Rel(safePath, path); err == nil {
-			if filepath.IsLocal(rel) {
-				return true
-			}
-		}
+	rel, err := filepath.Rel(homedir, path)
+	if err != nil {
+		return false
 	}
-	return false
+
+	return !strings.Contains(rel, "..")
 }
 
 func (p *path) GetPathByHash(prefix, name string) string {
@@ -199,7 +186,7 @@ func (p *path) GetAssetLocation(file string) string {
 func (p *path) GetExecutableFullPath() string {
 	exePath, err := os.Executable()
 	if err != nil {
-		return "clash"
+		return "mihomo"
 	}
 	res, _ := filepath.EvalSymlinks(exePath)
 	return res

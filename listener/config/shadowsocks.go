@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/metacubex/clash/listener/sing"
+	"github.com/metacubex/mihomo/listener/sing"
 
 	"encoding/json"
 )
@@ -13,7 +13,6 @@ type ShadowsocksServer struct {
 	Cipher    string
 	Udp       bool
 	MuxOption sing.MuxOption `yaml:"mux-option" json:"mux-option,omitempty"`
-	ShadowTLS ShadowTLS      `yaml:"shadow-tls" json:"shadow-tls,omitempty"`
 }
 
 func (t ShadowsocksServer) String() string {

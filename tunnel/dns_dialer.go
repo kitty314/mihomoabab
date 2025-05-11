@@ -8,11 +8,11 @@ import (
 	"net"
 	"strings"
 
-	N "github.com/metacubex/clash/common/net"
-	"github.com/metacubex/clash/component/dialer"
-	"github.com/metacubex/clash/component/resolver"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/tunnel/statistic"
+	N "github.com/metacubex/mihomo/common/net"
+	"github.com/metacubex/mihomo/component/dialer"
+	"github.com/metacubex/mihomo/component/resolver"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/tunnel/statistic"
 )
 
 const DnsRespectRules = "RULES"
@@ -21,17 +21,18 @@ type DNSDialer struct {
 	r            resolver.Resolver
 	proxyAdapter C.ProxyAdapter
 	proxyName    string
+	opts         []dialer.Option
 }
 
-func NewDNSDialer(r resolver.Resolver, proxyAdapter C.ProxyAdapter, proxyName string) *DNSDialer {
-	return &DNSDialer{r: r, proxyAdapter: proxyAdapter, proxyName: proxyName}
+func NewDNSDialer(r resolver.Resolver, proxyAdapter C.ProxyAdapter, proxyName string, opts ...dialer.Option) *DNSDialer {
+	return &DNSDialer{r: r, proxyAdapter: proxyAdapter, proxyName: proxyName, opts: opts}
 }
 
 func (d *DNSDialer) DialContext(ctx context.Context, network, addr string) (net.Conn, error) {
 	r := d.r
 	proxyName := d.proxyName
 	proxyAdapter := d.proxyAdapter
-	var opts []dialer.Option
+	opts := d.opts
 	var rule C.Rule
 	metadata := &C.Metadata{
 		NetWork: C.TCP,
@@ -93,7 +94,7 @@ func (d *DNSDialer) DialContext(ctx context.Context, network, addr string) (net.
 			metadata.Host = "" // clear host to avoid double resolve in proxy
 		}
 
-		conn, err := proxyAdapter.DialContext(ctx, metadata)
+		conn, err := proxyAdapter.DialContext(ctx, metadata, opts...)
 		if err != nil {
 			logMetadataErr(metadata, rule, proxyAdapter, err)
 			return nil, err
@@ -112,7 +113,7 @@ func (d *DNSDialer) DialContext(ctx context.Context, network, addr string) (net.
 			return nil, fmt.Errorf("proxy adapter [%s] UDP is not supported", proxyAdapter)
 		}
 
-		packetConn, err := proxyAdapter.ListenPacketContext(ctx, metadata)
+		packetConn, err := proxyAdapter.ListenPacketContext(ctx, metadata, opts...)
 		if err != nil {
 			logMetadataErr(metadata, rule, proxyAdapter, err)
 			return nil, err
@@ -130,7 +131,7 @@ func (d *DNSDialer) ListenPacket(ctx context.Context, network, addr string) (net
 	r := d.r
 	proxyAdapter := d.proxyAdapter
 	proxyName := d.proxyName
-	var opts []dialer.Option
+	opts := d.opts
 	metadata := &C.Metadata{
 		NetWork: C.UDP,
 		Type:    C.INNER,
@@ -172,7 +173,7 @@ func (d *DNSDialer) ListenPacket(ctx context.Context, network, addr string) (net
 		return nil, fmt.Errorf("proxy adapter [%s] UDP is not supported", proxyAdapter)
 	}
 
-	packetConn, err := proxyAdapter.ListenPacketContext(ctx, metadata)
+	packetConn, err := proxyAdapter.ListenPacketContext(ctx, metadata, opts...)
 	if err != nil {
 		logMetadataErr(metadata, rule, proxyAdapter, err)
 		return nil, err

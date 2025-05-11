@@ -7,11 +7,11 @@ import (
 	"net"
 	"time"
 
-	"github.com/metacubex/clash/common/atomic"
-	"github.com/metacubex/clash/common/buf"
-	"github.com/metacubex/clash/transport/anytls/padding"
-	"github.com/metacubex/clash/transport/anytls/session"
-	"github.com/metacubex/clash/transport/vmess"
+	"github.com/metacubex/mihomo/common/atomic"
+	"github.com/metacubex/mihomo/common/buf"
+	"github.com/metacubex/mihomo/transport/anytls/padding"
+	"github.com/metacubex/mihomo/transport/anytls/session"
+	"github.com/metacubex/mihomo/transport/vmess"
 
 	M "github.com/sagernet/sing/common/metadata"
 	N "github.com/sagernet/sing/common/network"

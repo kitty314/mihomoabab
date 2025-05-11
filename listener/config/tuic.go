@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/metacubex/clash/listener/sing"
+	"github.com/metacubex/mihomo/listener/sing"
 
 	"encoding/json"
 )

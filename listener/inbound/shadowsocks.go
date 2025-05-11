@@ -3,10 +3,10 @@ package inbound
 import (
 	"strings"
 
-	C "github.com/metacubex/clash/constant"
-	LC "github.com/metacubex/clash/listener/config"
-	"github.com/metacubex/clash/listener/sing_shadowsocks"
-	"github.com/metacubex/clash/log"
+	C "github.com/metacubex/mihomo/constant"
+	LC "github.com/metacubex/mihomo/listener/config"
+	"github.com/metacubex/mihomo/listener/sing_shadowsocks"
+	"github.com/metacubex/mihomo/log"
 )
 
 type ShadowSocksOption struct {
@@ -15,7 +15,6 @@ type ShadowSocksOption struct {
 	Cipher    string    `inbound:"cipher"`
 	UDP       bool      `inbound:"udp,omitempty"`
 	MuxOption MuxOption `inbound:"mux-option,omitempty"`
-	ShadowTLS ShadowTLS `inbound:"shadow-tls,omitempty"`
 }
 
 func (o ShadowSocksOption) Equal(config C.InboundConfig) bool {
@@ -44,7 +43,6 @@ func NewShadowSocks(options *ShadowSocksOption) (*ShadowSocks, error) {
 			Cipher:    options.Cipher,
 			Udp:       options.UDP,
 			MuxOption: options.MuxOption.Build(),
-			ShadowTLS: options.ShadowTLS.Build(),
 		},
 	}, nil
 }

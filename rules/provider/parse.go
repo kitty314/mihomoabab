@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/metacubex/clash/common/structure"
-	"github.com/metacubex/clash/component/resource"
-	C "github.com/metacubex/clash/constant"
-	P "github.com/metacubex/clash/constant/provider"
-	"github.com/metacubex/clash/rules/common"
+	"github.com/metacubex/mihomo/common/structure"
+	"github.com/metacubex/mihomo/component/resource"
+	C "github.com/metacubex/mihomo/constant"
+	P "github.com/metacubex/mihomo/constant/provider"
+	"github.com/metacubex/mihomo/rules/common"
 )
 
 var (
@@ -63,7 +63,5 @@ func ParseRuleProvider(name string, mapping map[string]any, parse common.ParseRu
 		return nil, fmt.Errorf("unsupported vehicle type: %s", schema.Type)
 	}
 
-	interval := time.Duration(uint(schema.Interval)) * time.Second
-
-	return NewRuleSetProvider(name, behavior, format, interval, vehicle, schema.Payload, parse), nil
+	return NewRuleSetProvider(name, behavior, format, time.Duration(uint(schema.Interval))*time.Second, vehicle, parse), nil
 }

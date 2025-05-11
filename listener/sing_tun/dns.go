@@ -7,15 +7,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/clash/component/resolver"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/listener/sing"
-	"github.com/metacubex/clash/log"
+	"github.com/metacubex/mihomo/component/resolver"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/listener/sing"
+	"github.com/metacubex/mihomo/log"
 
-	"github.com/metacubex/sing/common/buf"
-	"github.com/metacubex/sing/common/bufio"
-	M "github.com/metacubex/sing/common/metadata"
-	"github.com/metacubex/sing/common/network"
+	"github.com/sagernet/sing/common/buf"
+	"github.com/sagernet/sing/common/bufio"
+	M "github.com/sagernet/sing/common/metadata"
+	"github.com/sagernet/sing/common/network"
 )
 
 type ListenerHandler struct {

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/metacubex/clash/common/utils"
-	"github.com/metacubex/clash/constant"
+	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/constant"
 )
 
 // Vehicle Type

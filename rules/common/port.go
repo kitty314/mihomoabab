@@ -3,8 +3,8 @@ package common
 import (
 	"fmt"
 
-	"github.com/metacubex/clash/common/utils"
-	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/mihomo/common/utils"
+	C "github.com/metacubex/mihomo/constant"
 )
 
 type Port struct {

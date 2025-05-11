@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/metacubex/clash/common/pool"
-	"github.com/metacubex/clash/component/resource"
-	C "github.com/metacubex/clash/constant"
-	P "github.com/metacubex/clash/constant/provider"
-	"github.com/metacubex/clash/rules/common"
+	"github.com/metacubex/mihomo/common/pool"
+	"github.com/metacubex/mihomo/component/resource"
+	C "github.com/metacubex/mihomo/constant"
+	P "github.com/metacubex/mihomo/constant/provider"
+	"github.com/metacubex/mihomo/rules/common"
 
 	"gopkg.in/yaml.v3"
 )
@@ -133,7 +133,7 @@ func (rp *RuleSetProvider) Close() error {
 	return rp.ruleSetProvider.Close()
 }
 
-func NewRuleSetProvider(name string, behavior P.RuleBehavior, format P.RuleFormat, interval time.Duration, vehicle P.Vehicle, payload []string, parse common.ParseRuleFunc) P.RuleProvider {
+func NewRuleSetProvider(name string, behavior P.RuleBehavior, format P.RuleFormat, interval time.Duration, vehicle P.Vehicle, parse common.ParseRuleFunc) P.RuleProvider {
 	rp := &ruleSetProvider{
 		baseProvider: baseProvider{
 			behavior: behavior,
@@ -147,9 +147,6 @@ func NewRuleSetProvider(name string, behavior P.RuleBehavior, format P.RuleForma
 	}
 
 	rp.strategy = newStrategy(behavior, parse)
-	if len(payload) > 0 { // using as fallback rules
-		rp.strategy = rulesParseInline(payload, rp.strategy)
-	}
 	rp.Fetcher = resource.NewFetcher(name, interval, vehicle, func(bytes []byte) (ruleStrategy, error) {
 		return rulesParse(bytes, newStrategy(behavior, parse), format)
 	}, onUpdate)

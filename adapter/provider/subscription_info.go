@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/metacubex/clash/log"
+	"github.com/metacubex/mihomo/log"
 )
 
 type SubscriptionInfo struct {

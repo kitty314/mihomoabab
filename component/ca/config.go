@@ -14,7 +14,7 @@ import (
 	"strings"
 	"sync"
 
-	C "github.com/metacubex/clash/constant"
+	C "github.com/metacubex/mihomo/constant"
 )
 
 var globalCertPool *x509.CertPool

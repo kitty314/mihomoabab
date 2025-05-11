@@ -4,8 +4,8 @@ import (
 	"context"
 	"net"
 
-	"github.com/metacubex/clash/component/slowdown"
-	M "github.com/metacubex/sing/common/metadata"
+	"github.com/metacubex/mihomo/component/slowdown"
+	M "github.com/sagernet/sing/common/metadata"
 )
 
 type SlowDownSingDialer struct {

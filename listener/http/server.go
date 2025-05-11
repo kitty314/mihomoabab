@@ -5,12 +5,12 @@ import (
 	"errors"
 	"net"
 
-	"github.com/metacubex/clash/adapter/inbound"
-	"github.com/metacubex/clash/component/ca"
-	C "github.com/metacubex/clash/constant"
-	authStore "github.com/metacubex/clash/listener/auth"
-	LC "github.com/metacubex/clash/listener/config"
-	"github.com/metacubex/clash/listener/reality"
+	"github.com/metacubex/mihomo/adapter/inbound"
+	N "github.com/metacubex/mihomo/common/net"
+	C "github.com/metacubex/mihomo/constant"
+	authStore "github.com/metacubex/mihomo/listener/auth"
+	LC "github.com/metacubex/mihomo/listener/config"
+	"github.com/metacubex/mihomo/listener/reality"
 )
 
 type Listener struct {
@@ -68,7 +68,7 @@ func NewWithConfig(config LC.AuthServer, tunnel C.Tunnel, additions ...inbound.A
 	var realityBuilder *reality.Builder
 
 	if config.Certificate != "" && config.PrivateKey != "" {
-		cert, err := ca.LoadTLSKeyPair(config.Certificate, config.PrivateKey, C.Path)
+		cert, err := N.ParseCert(config.Certificate, config.PrivateKey, C.Path)
 		if err != nil {
 			return nil, err
 		}

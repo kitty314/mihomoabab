@@ -8,12 +8,12 @@ import (
 	"net/netip"
 	"strings"
 
-	N "github.com/metacubex/clash/common/net"
-	"github.com/metacubex/clash/component/dialer"
-	"github.com/metacubex/clash/component/resolver"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/tunnel"
-	"github.com/metacubex/clash/tunnel/statistic"
+	N "github.com/metacubex/mihomo/common/net"
+	"github.com/metacubex/mihomo/component/dialer"
+	"github.com/metacubex/mihomo/component/resolver"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/tunnel"
+	"github.com/metacubex/mihomo/tunnel/statistic"
 )
 
 type proxyDialer struct {
@@ -55,8 +55,8 @@ func (p proxyDialer) DialContext(ctx context.Context, network, address string) (
 	}
 	var conn C.Conn
 	var err error
-	if _, ok := p.dialer.(dialer.Dialer); ok { // first using old function to let mux work
-		conn, err = p.proxy.DialContext(ctx, currentMeta)
+	if d, ok := p.dialer.(dialer.Dialer); ok { // first using old function to let mux work
+		conn, err = p.proxy.DialContext(ctx, currentMeta, dialer.WithOption(d.Opt))
 	} else {
 		conn, err = p.proxy.DialContextWithDialer(ctx, p.dialer, currentMeta)
 	}
@@ -78,8 +78,8 @@ func (p proxyDialer) listenPacket(ctx context.Context, currentMeta *C.Metadata) 
 	var pc C.PacketConn
 	var err error
 	currentMeta.NetWork = C.UDP
-	if _, ok := p.dialer.(dialer.Dialer); ok { // first using old function to let mux work
-		pc, err = p.proxy.ListenPacketContext(ctx, currentMeta)
+	if d, ok := p.dialer.(dialer.Dialer); ok { // first using old function to let mux work
+		pc, err = p.proxy.ListenPacketContext(ctx, currentMeta, dialer.WithOption(d.Opt))
 	} else {
 		pc, err = p.proxy.ListenPacketWithDialer(ctx, p.dialer, currentMeta)
 	}

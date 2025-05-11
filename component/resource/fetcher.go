@@ -3,15 +3,13 @@ package resource
 import (
 	"context"
 	"os"
-	"sync"
 	"time"
 
-	"github.com/metacubex/clash/common/utils"
-	"github.com/metacubex/clash/component/slowdown"
-	types "github.com/metacubex/clash/constant/provider"
-	"github.com/metacubex/clash/log"
+	"github.com/metacubex/mihomo/common/utils"
+	types "github.com/metacubex/mihomo/constant/provider"
+	"github.com/metacubex/mihomo/log"
 
-	"github.com/metacubex/fswatch"
+	"github.com/sagernet/fswatch"
 	"github.com/samber/lo"
 )
 
@@ -29,8 +27,6 @@ type Fetcher[V any] struct {
 	interval     time.Duration
 	onUpdate     func(V)
 	watcher      *fswatch.Watcher
-	loadBufMutex sync.Mutex
-	backoff      slowdown.Backoff
 }
 
 func (f *Fetcher[V]) Name() string {
@@ -50,11 +46,17 @@ func (f *Fetcher[V]) UpdatedAt() time.Time {
 }
 
 func (f *Fetcher[V]) Initial() (V, error) {
+	var (
+		buf      []byte
+		contents V
+		err      error
+	)
+
 	if stat, fErr := os.Stat(f.vehicle.Path()); fErr == nil {
 		// local file exists, use it first
-		buf, err := os.ReadFile(f.vehicle.Path())
+		buf, err = os.ReadFile(f.vehicle.Path())
 		modTime := stat.ModTime()
-		contents, _, err := f.loadBuf(buf, utils.MakeHash(buf), false)
+		contents, _, err = f.loadBuf(buf, utils.MakeHash(buf), false)
 		f.updatedAt = modTime // reset updatedAt to file's modTime
 
 		if err == nil {
@@ -67,25 +69,21 @@ func (f *Fetcher[V]) Initial() (V, error) {
 	}
 
 	// parse local file error, fallback to remote
-	contents, _, updateErr := f.Update()
+	contents, _, err = f.Update()
 
-	// start the pull loop even if f.Update() failed
-	err := f.startPullLoop(false)
 	if err != nil {
 		return lo.Empty[V](), err
 	}
-
-	if updateErr != nil {
-		return lo.Empty[V](), updateErr
+	err = f.startPullLoop(false)
+	if err != nil {
+		return lo.Empty[V](), err
 	}
-
 	return contents, nil
 }
 
 func (f *Fetcher[V]) Update() (V, bool, error) {
 	buf, hash, err := f.vehicle.Read(f.ctx, f.hash)
 	if err != nil {
-		f.backoff.AddAttempt() // add a failed attempt to backoff
 		return lo.Empty[V](), false, err
 	}
 	return f.loadBuf(buf, hash, f.vehicle.Type() != types.File)
@@ -96,9 +94,6 @@ func (f *Fetcher[V]) SideUpdate(buf []byte) (V, bool, error) {
 }
 
 func (f *Fetcher[V]) loadBuf(buf []byte, hash utils.HashType, updateFile bool) (V, bool, error) {
-	f.loadBufMutex.Lock()
-	defer f.loadBufMutex.Unlock()
-
 	now := time.Now()
 	if f.hash.Equal(hash) {
 		if updateFile {
@@ -114,10 +109,8 @@ func (f *Fetcher[V]) loadBuf(buf []byte, hash utils.HashType, updateFile bool) (
 
 	contents, err := f.parser(buf)
 	if err != nil {
-		f.backoff.AddAttempt() // add a failed attempt to backoff
 		return lo.Empty[V](), false, err
 	}
-	f.backoff.Reset() // no error, reset backoff
 
 	if updateFile {
 		if err = f.vehicle.Write(buf); err != nil {
@@ -152,25 +145,14 @@ func (f *Fetcher[V]) pullLoop(forceUpdate bool) {
 		log.Warnln("[Provider] %s not updated for a long time, force refresh", f.Name())
 		f.updateWithLog()
 	}
-	if attempt := f.backoff.Attempt(); attempt > 0 { // f.Update() was failed, decrease the interval from backoff to achieve fast retry
-		if duration := f.backoff.ForAttempt(attempt); duration < initialInterval {
-			initialInterval = duration
-		}
-	}
 
 	timer := time.NewTimer(initialInterval)
 	defer timer.Stop()
 	for {
 		select {
 		case <-timer.C:
+			timer.Reset(f.interval)
 			f.updateWithLog()
-			interval := f.interval
-			if attempt := f.backoff.Attempt(); attempt > 0 { // f.Update() was failed, decrease the interval from backoff to achieve fast retry
-				if duration := f.backoff.ForAttempt(attempt); duration < interval {
-					interval = duration
-				}
-			}
-			timer.Reset(interval)
 		case <-f.ctx.Done():
 			return
 		}
@@ -228,11 +210,5 @@ func NewFetcher[V any](name string, interval time.Duration, vehicle types.Vehicl
 		parser:    parser,
 		onUpdate:  onUpdate,
 		interval:  interval,
-		backoff: slowdown.Backoff{
-			Factor: 2,
-			Jitter: false,
-			Min:    time.Second,
-			Max:    interval,
-		},
 	}
 }

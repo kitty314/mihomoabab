@@ -3,10 +3,10 @@ package outbound
 import (
 	"context"
 	"errors"
-	"github.com/metacubex/clash/component/dialer"
-	"github.com/metacubex/clash/component/loopback"
-	"github.com/metacubex/clash/component/resolver"
-	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/mihomo/component/dialer"
+	"github.com/metacubex/mihomo/component/loopback"
+	"github.com/metacubex/mihomo/component/resolver"
+	C "github.com/metacubex/mihomo/constant"
 )
 
 type Direct struct {
@@ -20,13 +20,12 @@ type DirectOption struct {
 }
 
 // DialContext implements C.ProxyAdapter
-func (d *Direct) DialContext(ctx context.Context, metadata *C.Metadata) (C.Conn, error) {
+func (d *Direct) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.Conn, error) {
 	if err := d.loopBack.CheckConn(metadata); err != nil {
 		return nil, err
 	}
-	opts := d.DialOptions()
 	opts = append(opts, dialer.WithResolver(resolver.DirectHostResolver))
-	c, err := dialer.DialContext(ctx, "tcp", metadata.RemoteAddress(), opts...)
+	c, err := dialer.DialContext(ctx, "tcp", metadata.RemoteAddress(), d.Base.DialOptions(opts...)...)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +33,7 @@ func (d *Direct) DialContext(ctx context.Context, metadata *C.Metadata) (C.Conn,
 }
 
 // ListenPacketContext implements C.ProxyAdapter
-func (d *Direct) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (C.PacketConn, error) {
+func (d *Direct) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.PacketConn, error) {
 	if err := d.loopBack.CheckPacketConn(metadata); err != nil {
 		return nil, err
 	}
@@ -46,7 +45,7 @@ func (d *Direct) ListenPacketContext(ctx context.Context, metadata *C.Metadata) 
 		}
 		metadata.DstIP = ip
 	}
-	pc, err := dialer.NewDialer(d.DialOptions()...).ListenPacket(ctx, "udp", "", metadata.AddrPort())
+	pc, err := dialer.NewDialer(d.Base.DialOptions(opts...)...).ListenPacket(ctx, "udp", "", metadata.AddrPort())
 	if err != nil {
 		return nil, err
 	}

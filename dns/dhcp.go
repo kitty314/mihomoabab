@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/clash/component/dhcp"
-	"github.com/metacubex/clash/component/iface"
+	"github.com/metacubex/mihomo/component/dhcp"
+	"github.com/metacubex/mihomo/component/iface"
 	D "github.com/miekg/dns"
 )
 
@@ -82,7 +82,7 @@ func (d *dhcpClient) resolve(ctx context.Context) ([]dnsClient, error) {
 				for _, item := range dns {
 					nameserver = append(nameserver, NameServer{
 						Addr:      net.JoinHostPort(item.String(), "53"),
-						ProxyName: d.ifaceName,
+						Interface: d.ifaceName,
 					})
 				}
 

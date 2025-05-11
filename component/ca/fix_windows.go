@@ -1,7 +1,7 @@
 package ca
 
 import (
-	"github.com/metacubex/clash/constant/features"
+	"github.com/metacubex/mihomo/constant/features"
 )
 
 func init() {

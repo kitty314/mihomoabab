@@ -5,11 +5,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/metacubex/clash/common/atomic"
+	"github.com/metacubex/mihomo/common/atomic"
 
-	"github.com/metacubex/sing/common/buf"
-	"github.com/metacubex/sing/common/bufio"
-	"github.com/metacubex/sing/common/network"
+	"github.com/sagernet/sing/common/buf"
+	"github.com/sagernet/sing/common/bufio"
+	"github.com/sagernet/sing/common/network"
 )
 
 type connReadResult struct {

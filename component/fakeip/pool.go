@@ -6,8 +6,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/metacubex/clash/component/profile/cachefile"
-	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/mihomo/component/profile/cachefile"
+	C "github.com/metacubex/mihomo/constant"
 
 	"go4.org/netipx"
 )

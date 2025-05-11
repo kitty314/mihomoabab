@@ -6,24 +6,23 @@ import (
 	"net"
 	"strings"
 
-	"github.com/metacubex/clash/adapter/inbound"
-	"github.com/metacubex/clash/common/sockopt"
-	C "github.com/metacubex/clash/constant"
-	LC "github.com/metacubex/clash/listener/config"
-	embedSS "github.com/metacubex/clash/listener/shadowsocks"
-	"github.com/metacubex/clash/listener/sing"
-	"github.com/metacubex/clash/log"
-	"github.com/metacubex/clash/ntp"
+	"github.com/metacubex/mihomo/adapter/inbound"
+	"github.com/metacubex/mihomo/common/sockopt"
+	C "github.com/metacubex/mihomo/constant"
+	LC "github.com/metacubex/mihomo/listener/config"
+	embedSS "github.com/metacubex/mihomo/listener/shadowsocks"
+	"github.com/metacubex/mihomo/listener/sing"
+	"github.com/metacubex/mihomo/log"
+	"github.com/metacubex/mihomo/ntp"
 
 	shadowsocks "github.com/metacubex/sing-shadowsocks"
 	"github.com/metacubex/sing-shadowsocks/shadowaead"
 	"github.com/metacubex/sing-shadowsocks/shadowaead_2022"
-	shadowtls "github.com/metacubex/sing-shadowtls"
-	"github.com/metacubex/sing/common"
-	"github.com/metacubex/sing/common/buf"
-	"github.com/metacubex/sing/common/bufio"
-	M "github.com/metacubex/sing/common/metadata"
-	"github.com/metacubex/sing/common/network"
+	"github.com/sagernet/sing/common"
+	"github.com/sagernet/sing/common/buf"
+	"github.com/sagernet/sing/common/bufio"
+	M "github.com/sagernet/sing/common/metadata"
+	"github.com/sagernet/sing/common/network"
 )
 
 type Listener struct {
@@ -32,23 +31,9 @@ type Listener struct {
 	listeners    []net.Listener
 	udpListeners []net.PacketConn
 	service      shadowsocks.Service
-	shadowTLS    *shadowtls.Service
 }
 
 var _listener *Listener
-
-// shadowTLSService is a wrapper for shadowsocks.Service to support shadowTLS.
-type shadowTLSService struct {
-	shadowsocks.Service
-	shadowTLS *shadowtls.Service
-}
-
-func (s *shadowTLSService) NewConnection(ctx context.Context, conn net.Conn, metadata M.Metadata) error {
-	if s.shadowTLS != nil {
-		return s.shadowTLS.NewConnection(ctx, conn, metadata)
-	}
-	return s.Service.NewConnection(ctx, conn, metadata)
-}
 
 func New(config LC.ShadowsocksServer, tunnel C.Tunnel, additions ...inbound.Addition) (C.MultiAddrListener, error) {
 	var sl *Listener
@@ -75,8 +60,7 @@ func New(config LC.ShadowsocksServer, tunnel C.Tunnel, additions ...inbound.Addi
 		return nil, err
 	}
 
-	sl = &Listener{}
-	sl.config = config
+	sl = &Listener{false, config, nil, nil, nil}
 
 	switch {
 	case config.Cipher == shadowsocks.MethodNone:
@@ -91,51 +75,6 @@ func New(config LC.ShadowsocksServer, tunnel C.Tunnel, additions ...inbound.Addi
 	}
 	if err != nil {
 		return nil, err
-	}
-
-	if config.ShadowTLS.Enable {
-		buildHandshake := func(handshake LC.ShadowTLSHandshakeOptions) (handshakeConfig shadowtls.HandshakeConfig) {
-			handshakeConfig.Server = M.ParseSocksaddr(handshake.Dest)
-			handshakeConfig.Dialer = sing.NewDialer(tunnel, handshake.Proxy)
-			return
-		}
-		var handshakeForServerName map[string]shadowtls.HandshakeConfig
-		if config.ShadowTLS.Version > 1 {
-			handshakeForServerName = make(map[string]shadowtls.HandshakeConfig)
-			for serverName, serverOptions := range config.ShadowTLS.HandshakeForServerName {
-				handshakeForServerName[serverName] = buildHandshake(serverOptions)
-			}
-		}
-		var wildcardSNI shadowtls.WildcardSNI
-		switch config.ShadowTLS.WildcardSNI {
-		case "authed":
-			wildcardSNI = shadowtls.WildcardSNIAuthed
-		case "all":
-			wildcardSNI = shadowtls.WildcardSNIAll
-		default:
-			wildcardSNI = shadowtls.WildcardSNIOff
-		}
-		var shadowTLS *shadowtls.Service
-		shadowTLS, err = shadowtls.NewService(shadowtls.ServiceConfig{
-			Version:  config.ShadowTLS.Version,
-			Password: config.ShadowTLS.Password,
-			Users: common.Map(config.ShadowTLS.Users, func(it LC.ShadowTLSUser) shadowtls.User {
-				return shadowtls.User{Name: it.Name, Password: it.Password}
-			}),
-			Handshake:              buildHandshake(config.ShadowTLS.Handshake),
-			HandshakeForServerName: handshakeForServerName,
-			StrictMode:             config.ShadowTLS.StrictMode,
-			WildcardSNI:            wildcardSNI,
-			Handler:                sl.service,
-			Logger:                 log.SingLogger,
-		})
-		if err != nil {
-			return nil, err
-		}
-		sl.service = &shadowTLSService{
-			Service:   sl.service,
-			shadowTLS: shadowTLS,
-		}
 	}
 
 	for _, addr := range strings.Split(config.Listen, ",") {

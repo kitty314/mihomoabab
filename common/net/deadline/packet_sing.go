@@ -4,12 +4,12 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/metacubex/clash/common/net/packet"
+	"github.com/metacubex/mihomo/common/net/packet"
 
-	"github.com/metacubex/sing/common/buf"
-	"github.com/metacubex/sing/common/bufio"
-	M "github.com/metacubex/sing/common/metadata"
-	N "github.com/metacubex/sing/common/network"
+	"github.com/sagernet/sing/common/buf"
+	"github.com/sagernet/sing/common/bufio"
+	M "github.com/sagernet/sing/common/metadata"
+	N "github.com/sagernet/sing/common/network"
 )
 
 type SingPacketConn struct {

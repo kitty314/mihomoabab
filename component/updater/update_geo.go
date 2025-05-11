@@ -8,17 +8,17 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/metacubex/clash/common/atomic"
-	"github.com/metacubex/clash/common/utils"
-	"github.com/metacubex/clash/component/geodata"
-	_ "github.com/metacubex/clash/component/geodata/standard"
-	"github.com/metacubex/clash/component/mmdb"
-	"github.com/metacubex/clash/component/resource"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/log"
+	"github.com/metacubex/mihomo/common/atomic"
+	"github.com/metacubex/mihomo/common/batch"
+	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/component/geodata"
+	_ "github.com/metacubex/mihomo/component/geodata/standard"
+	"github.com/metacubex/mihomo/component/mmdb"
+	"github.com/metacubex/mihomo/component/resource"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/log"
 
 	"github.com/oschwald/maxminddb-golang"
-	"golang.org/x/sync/errgroup"
 )
 
 var (
@@ -169,25 +169,41 @@ func UpdateGeoSite() (err error) {
 func updateGeoDatabases() error {
 	defer runtime.GC()
 
-	b := errgroup.Group{}
+	b, _ := batch.New[interface{}](context.Background())
 
 	if geodata.GeoIpEnable() {
 		if geodata.GeodataMode() {
-			b.Go(UpdateGeoIp)
+			b.Go("UpdateGeoIp", func() (_ interface{}, err error) {
+				err = UpdateGeoIp()
+				return
+			})
 		} else {
-			b.Go(UpdateMMDB)
+			b.Go("UpdateMMDB", func() (_ interface{}, err error) {
+				err = UpdateMMDB()
+				return
+			})
 		}
 	}
 
 	if geodata.ASNEnable() {
-		b.Go(UpdateASN)
+		b.Go("UpdateASN", func() (_ interface{}, err error) {
+			err = UpdateASN()
+			return
+		})
 	}
 
 	if geodata.GeoSiteEnable() {
-		b.Go(UpdateGeoSite)
+		b.Go("UpdateGeoSite", func() (_ interface{}, err error) {
+			err = UpdateGeoSite()
+			return
+		})
 	}
 
-	return b.Wait()
+	if e := b.Wait(); e != nil {
+		return e.Err
+	}
+
+	return nil
 }
 
 var ErrGetDatabaseUpdateSkip = errors.New("GEO database is updating, skip")

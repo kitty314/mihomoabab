@@ -6,14 +6,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/clash/common/atomic"
-	"github.com/metacubex/clash/common/singledo"
-	"github.com/metacubex/clash/common/utils"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/log"
+	"github.com/metacubex/mihomo/common/atomic"
+	"github.com/metacubex/mihomo/common/batch"
+	"github.com/metacubex/mihomo/common/singledo"
+	"github.com/metacubex/mihomo/common/utils"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/log"
 
 	"github.com/dlclark/regexp2"
-	"golang.org/x/sync/errgroup"
 )
 
 type HealthCheckOption struct {
@@ -147,8 +147,7 @@ func (hc *HealthCheck) check() {
 	_, _, _ = hc.singleDo.Do(func() (struct{}, error) {
 		id := utils.NewUUIDV4().String()
 		log.Debugln("Start New Health Checking {%s}", id)
-		b := new(errgroup.Group)
-		b.SetLimit(10)
+		b, _ := batch.New[bool](hc.ctx, batch.WithConcurrencyNum[bool](10))
 
 		// execute default health check
 		option := &extraOption{filters: nil, expectedStatus: hc.expectedStatus}
@@ -160,13 +159,13 @@ func (hc *HealthCheck) check() {
 				hc.execute(b, url, id, option)
 			}
 		}
-		_ = b.Wait()
+		b.Wait()
 		log.Debugln("Finish A Health Checking {%s}", id)
 		return struct{}{}, nil
 	})
 }
 
-func (hc *HealthCheck) execute(b *errgroup.Group, url, uid string, option *extraOption) {
+func (hc *HealthCheck) execute(b *batch.Batch[bool], url, uid string, option *extraOption) {
 	url = strings.TrimSpace(url)
 	if len(url) == 0 {
 		log.Debugln("Health Check has been skipped due to testUrl is empty, {%s}", uid)
@@ -196,13 +195,13 @@ func (hc *HealthCheck) execute(b *errgroup.Group, url, uid string, option *extra
 		}
 
 		p := proxy
-		b.Go(func() error {
+		b.Go(p.Name(), func() (bool, error) {
 			ctx, cancel := context.WithTimeout(hc.ctx, hc.timeout)
 			defer cancel()
 			log.Debugln("Health Checking, proxy: %s, url: %s, id: {%s}", p.Name(), url, uid)
 			_, _ = p.URLTest(ctx, url, expectedStatus)
 			log.Debugln("Health Checked, proxy: %s, url: %s, alive: %t, delay: %d ms uid: {%s}", p.Name(), url, p.AliveForTestUrl(url), p.LastDelayForTestUrl(url), uid)
-			return nil
+			return false, nil
 		})
 	}
 }

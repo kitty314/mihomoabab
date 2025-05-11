@@ -9,12 +9,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/clash/common/callback"
-	"github.com/metacubex/clash/common/lru"
-	N "github.com/metacubex/clash/common/net"
-	"github.com/metacubex/clash/common/utils"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/constant/provider"
+	"github.com/metacubex/mihomo/adapter/outbound"
+	"github.com/metacubex/mihomo/common/callback"
+	"github.com/metacubex/mihomo/common/lru"
+	N "github.com/metacubex/mihomo/common/net"
+	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/component/dialer"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/constant/provider"
 
 	"golang.org/x/net/publicsuffix"
 )
@@ -86,9 +88,9 @@ func jumpHash(key uint64, buckets int32) int32 {
 }
 
 // DialContext implements C.ProxyAdapter
-func (lb *LoadBalance) DialContext(ctx context.Context, metadata *C.Metadata) (c C.Conn, err error) {
+func (lb *LoadBalance) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (c C.Conn, err error) {
 	proxy := lb.Unwrap(metadata, true)
-	c, err = proxy.DialContext(ctx, metadata)
+	c, err = proxy.DialContext(ctx, metadata, lb.Base.DialOptions(opts...)...)
 
 	if err == nil {
 		c.AppendToChains(lb)
@@ -110,7 +112,7 @@ func (lb *LoadBalance) DialContext(ctx context.Context, metadata *C.Metadata) (c
 }
 
 // ListenPacketContext implements C.ProxyAdapter
-func (lb *LoadBalance) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (pc C.PacketConn, err error) {
+func (lb *LoadBalance) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (pc C.PacketConn, err error) {
 	defer func() {
 		if err == nil {
 			pc.AppendToChains(lb)
@@ -118,7 +120,7 @@ func (lb *LoadBalance) ListenPacketContext(ctx context.Context, metadata *C.Meta
 	}()
 
 	proxy := lb.Unwrap(metadata, true)
-	return proxy.ListenPacketContext(ctx, metadata)
+	return proxy.ListenPacketContext(ctx, metadata, lb.Base.DialOptions(opts...)...)
 }
 
 // SupportUDP implements C.ProxyAdapter
@@ -253,14 +255,18 @@ func NewLoadBalance(option *GroupCommonOption, providers []provider.ProxyProvide
 	}
 	return &LoadBalance{
 		GroupBase: NewGroupBase(GroupBaseOption{
-			Name:           option.Name,
-			Type:           C.LoadBalance,
-			Filter:         option.Filter,
-			ExcludeFilter:  option.ExcludeFilter,
-			ExcludeType:    option.ExcludeType,
-			TestTimeout:    option.TestTimeout,
-			MaxFailedTimes: option.MaxFailedTimes,
-			Providers:      providers,
+			outbound.BaseOption{
+				Name:        option.Name,
+				Type:        C.LoadBalance,
+				Interface:   option.Interface,
+				RoutingMark: option.RoutingMark,
+			},
+			option.Filter,
+			option.ExcludeFilter,
+			option.ExcludeType,
+			option.TestTimeout,
+			option.MaxFailedTimes,
+			providers,
 		}),
 		strategyFn:     strategyFn,
 		disableUDP:     option.DisableUDP,

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	L "github.com/metacubex/sing/common/logger"
+	L "github.com/sagernet/sing/common/logger"
 )
 
 type singLogger struct{}

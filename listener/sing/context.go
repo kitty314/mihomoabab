@@ -4,9 +4,9 @@ import (
 	"context"
 	"golang.org/x/exp/slices"
 
-	"github.com/metacubex/clash/adapter/inbound"
+	"github.com/metacubex/mihomo/adapter/inbound"
 
-	"github.com/metacubex/sing/common/auth"
+	"github.com/sagernet/sing/common/auth"
 )
 
 type contextKey string

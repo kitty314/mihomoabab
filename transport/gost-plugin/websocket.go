@@ -6,8 +6,8 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/metacubex/clash/component/ca"
-	"github.com/metacubex/clash/transport/vmess"
+	"github.com/metacubex/mihomo/component/ca"
+	"github.com/metacubex/mihomo/transport/vmess"
 	smux "github.com/sagernet/smux"
 )
 

@@ -6,14 +6,14 @@ import (
 	"net/netip"
 	"time"
 
-	"github.com/metacubex/clash/common/arc"
-	"github.com/metacubex/clash/common/lru"
-	"github.com/metacubex/clash/common/singleflight"
-	"github.com/metacubex/clash/component/fakeip"
-	"github.com/metacubex/clash/component/resolver"
-	"github.com/metacubex/clash/component/trie"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/log"
+	"github.com/metacubex/mihomo/common/arc"
+	"github.com/metacubex/mihomo/common/lru"
+	"github.com/metacubex/mihomo/common/singleflight"
+	"github.com/metacubex/mihomo/component/fakeip"
+	"github.com/metacubex/mihomo/component/resolver"
+	"github.com/metacubex/mihomo/component/trie"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/log"
 
 	D "github.com/miekg/dns"
 	"github.com/samber/lo"
@@ -393,6 +393,7 @@ func (r *Resolver) ResetConnection() {
 type NameServer struct {
 	Net          string
 	Addr         string
+	Interface    string
 	ProxyAdapter C.ProxyAdapter
 	ProxyName    string
 	Params       map[string]string
@@ -406,6 +407,7 @@ func (ns NameServer) Equal(ns2 NameServer) bool {
 	}()
 	if ns.Net == ns2.Net &&
 		ns.Addr == ns2.Addr &&
+		ns.Interface == ns2.Interface &&
 		ns.ProxyAdapter == ns2.ProxyAdapter &&
 		ns.ProxyName == ns2.ProxyName &&
 		maps.Equal(ns.Params, ns2.Params) &&

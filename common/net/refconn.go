@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/metacubex/clash/common/buf"
+	"github.com/metacubex/mihomo/common/buf"
 )
 
 type refConn struct {

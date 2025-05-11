@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/metacubex/clash/common/structure"
-	"github.com/metacubex/clash/common/utils"
-	"github.com/metacubex/clash/component/resource"
-	C "github.com/metacubex/clash/constant"
-	types "github.com/metacubex/clash/constant/provider"
+	"github.com/metacubex/mihomo/common/structure"
+	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/component/resource"
+	C "github.com/metacubex/mihomo/constant"
+	types "github.com/metacubex/mihomo/constant/provider"
 
 	"github.com/dlclark/regexp2"
 )
@@ -127,5 +127,5 @@ func ParseProxyProvider(name string, mapping map[string]any) (types.ProxyProvide
 
 	interval := time.Duration(uint(schema.Interval)) * time.Second
 
-	return NewProxySetProvider(name, interval, schema.Payload, parser, vehicle, hc)
+	return NewProxySetProvider(name, interval, parser, vehicle, hc)
 }

@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/metacubex/clash/common/atomic"
-	"github.com/metacubex/clash/transport/anytls/util"
+	"github.com/metacubex/mihomo/common/atomic"
+	"github.com/metacubex/mihomo/transport/anytls/util"
 )
 
 const CheckMark = -1
