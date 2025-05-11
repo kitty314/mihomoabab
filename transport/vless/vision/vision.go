@@ -10,11 +10,11 @@ import (
 	"reflect"
 	"unsafe"
 
-	N "github.com/metacubex/clash/common/net"
-	tlsC "github.com/metacubex/clash/component/tls"
+	N "github.com/metacubex/mihomo/common/net"
+	tlsC "github.com/metacubex/mihomo/component/tls"
 
 	"github.com/gofrs/uuid/v5"
-	"github.com/metacubex/sing/common"
+	"github.com/sagernet/sing/common"
 )
 
 var ErrNotTLS13 = errors.New("XTLS Vision based on TLS 1.3 outer connection")

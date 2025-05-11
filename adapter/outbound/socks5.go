@@ -10,12 +10,12 @@ import (
 	"net/netip"
 	"strconv"
 
-	N "github.com/metacubex/clash/common/net"
-	"github.com/metacubex/clash/component/ca"
-	"github.com/metacubex/clash/component/dialer"
-	"github.com/metacubex/clash/component/proxydialer"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/transport/socks5"
+	N "github.com/metacubex/mihomo/common/net"
+	"github.com/metacubex/mihomo/component/ca"
+	"github.com/metacubex/mihomo/component/dialer"
+	"github.com/metacubex/mihomo/component/proxydialer"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/transport/socks5"
 )
 
 type Socks5 struct {
@@ -66,8 +66,8 @@ func (ss *Socks5) StreamConnContext(ctx context.Context, c net.Conn, metadata *C
 }
 
 // DialContext implements C.ProxyAdapter
-func (ss *Socks5) DialContext(ctx context.Context, metadata *C.Metadata) (_ C.Conn, err error) {
-	return ss.DialContextWithDialer(ctx, dialer.NewDialer(ss.DialOptions()...), metadata)
+func (ss *Socks5) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
+	return ss.DialContextWithDialer(ctx, dialer.NewDialer(ss.Base.DialOptions(opts...)...), metadata)
 }
 
 // DialContextWithDialer implements C.ProxyAdapter
@@ -101,8 +101,8 @@ func (ss *Socks5) SupportWithDialer() C.NetWork {
 }
 
 // ListenPacketContext implements C.ProxyAdapter
-func (ss *Socks5) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (_ C.PacketConn, err error) {
-	var cDialer C.Dialer = dialer.NewDialer(ss.DialOptions()...)
+func (ss *Socks5) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.PacketConn, err error) {
+	var cDialer C.Dialer = dialer.NewDialer(ss.Base.DialOptions(opts...)...)
 	if len(ss.option.DialerProxy) > 0 {
 		cDialer, err = proxydialer.NewByName(ss.option.DialerProxy, cDialer)
 		if err != nil {

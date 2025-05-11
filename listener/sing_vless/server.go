@@ -10,20 +10,20 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/metacubex/clash/adapter/inbound"
-	"github.com/metacubex/clash/component/ca"
-	tlsC "github.com/metacubex/clash/component/tls"
-	C "github.com/metacubex/clash/constant"
-	LC "github.com/metacubex/clash/listener/config"
-	"github.com/metacubex/clash/listener/reality"
-	"github.com/metacubex/clash/listener/sing"
-	"github.com/metacubex/clash/log"
-	"github.com/metacubex/clash/transport/gun"
-	clashVMess "github.com/metacubex/clash/transport/vmess"
+	"github.com/metacubex/mihomo/adapter/inbound"
+	N "github.com/metacubex/mihomo/common/net"
+	tlsC "github.com/metacubex/mihomo/component/tls"
+	C "github.com/metacubex/mihomo/constant"
+	LC "github.com/metacubex/mihomo/listener/config"
+	"github.com/metacubex/mihomo/listener/reality"
+	"github.com/metacubex/mihomo/listener/sing"
+	"github.com/metacubex/mihomo/log"
+	"github.com/metacubex/mihomo/transport/gun"
+	mihomoVMess "github.com/metacubex/mihomo/transport/vmess"
 
 	"github.com/metacubex/sing-vmess/vless"
-	"github.com/metacubex/sing/common"
-	"github.com/metacubex/sing/common/metadata"
+	"github.com/sagernet/sing/common"
+	"github.com/sagernet/sing/common/metadata"
 )
 
 func init() {
@@ -87,7 +87,7 @@ func New(config LC.VlessServer, tunnel C.Tunnel, additions ...inbound.Addition) 
 	var httpHandler http.Handler
 
 	if config.Certificate != "" && config.PrivateKey != "" {
-		cert, err := ca.LoadTLSKeyPair(config.Certificate, config.PrivateKey, C.Path)
+		cert, err := N.ParseCert(config.Certificate, config.PrivateKey, C.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -105,7 +105,7 @@ func New(config LC.VlessServer, tunnel C.Tunnel, additions ...inbound.Addition) 
 	if config.WsPath != "" {
 		httpMux := http.NewServeMux()
 		httpMux.HandleFunc(config.WsPath, func(w http.ResponseWriter, r *http.Request) {
-			conn, err := clashVMess.StreamUpgradedWebsocketConn(w, r)
+			conn, err := mihomoVMess.StreamUpgradedWebsocketConn(w, r)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 				return

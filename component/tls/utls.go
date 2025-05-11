@@ -4,52 +4,53 @@ import (
 	"crypto/tls"
 	"net"
 
-	"github.com/metacubex/clash/common/once"
-	"github.com/metacubex/clash/common/utils"
-	"github.com/metacubex/clash/log"
+	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/log"
 
 	utls "github.com/metacubex/utls"
 	"github.com/mroth/weightedrand/v2"
 )
 
-type Conn = utls.Conn
 type UConn = utls.UConn
-type UClientHelloID = utls.ClientHelloID
 
 const VersionTLS13 = utls.VersionTLS13
 
-func Client(c net.Conn, config *utls.Config) *Conn {
-	return utls.Client(c, config)
+type UClientHelloID struct {
+	*utls.ClientHelloID
 }
+
+var initRandomFingerprint UClientHelloID
+var initUtlsClient string
 
 func UClient(c net.Conn, config *utls.Config, fingerprint UClientHelloID) *UConn {
-	return utls.UClient(c, config, fingerprint)
+	return utls.UClient(c, config, *fingerprint.ClientHelloID)
 }
 
-func GetFingerprint(clientFingerprint string) (UClientHelloID, bool) {
-	if len(clientFingerprint) == 0 {
-		clientFingerprint = globalFingerprint
-	}
-	if len(clientFingerprint) == 0 || clientFingerprint == "none" {
+func GetFingerprint(ClientFingerprint string) (UClientHelloID, bool) {
+	if ClientFingerprint == "none" {
 		return UClientHelloID{}, false
 	}
 
-	if clientFingerprint == "random" {
-		fingerprint := randomFingerprint()
-		log.Debugln("use initial random HelloID:%s", fingerprint.Client)
-		return fingerprint, true
+	if initRandomFingerprint.ClientHelloID == nil {
+		initRandomFingerprint, _ = RollFingerprint()
 	}
 
-	if fingerprint, ok := fingerprints[clientFingerprint]; ok {
+	if ClientFingerprint == "random" {
+		log.Debugln("use initial random HelloID:%s", initRandomFingerprint.Client)
+		return initRandomFingerprint, true
+	}
+
+	fingerprint, ok := Fingerprints[ClientFingerprint]
+	if ok {
 		log.Debugln("use specified fingerprint:%s", fingerprint.Client)
-		return fingerprint, true
+		return fingerprint, ok
 	} else {
-		log.Warnln("wrong clientFingerprint:%s", clientFingerprint)
+		log.Warnln("wrong ClientFingerprint:%s", ClientFingerprint)
 		return UClientHelloID{}, false
 	}
 }
 
-var randomFingerprint = once.OnceValue(func() UClientHelloID {
+func RollFingerprint() (UClientHelloID, bool) {
 	chooser, _ := weightedrand.NewChooser(
 		weightedrand.NewChoice("chrome", 6),
 		weightedrand.NewChoice("safari", 3),
@@ -58,29 +59,26 @@ var randomFingerprint = once.OnceValue(func() UClientHelloID {
 	)
 	initClient := chooser.Pick()
 	log.Debugln("initial random HelloID:%s", initClient)
-	fingerprint, ok := fingerprints[initClient]
-	if !ok {
-		log.Warnln("error in initial random HelloID:%s", initClient)
-	}
-	return fingerprint
-})
+	fingerprint, ok := Fingerprints[initClient]
+	return fingerprint, ok
+}
 
-var fingerprints = map[string]UClientHelloID{
-	"chrome":                     utls.HelloChrome_Auto,
-	"chrome_psk":                 utls.HelloChrome_100_PSK,
-	"chrome_psk_shuffle":         utls.HelloChrome_106_Shuffle,
-	"chrome_padding_psk_shuffle": utls.HelloChrome_114_Padding_PSK_Shuf,
-	"chrome_pq":                  utls.HelloChrome_115_PQ,
-	"chrome_pq_psk":              utls.HelloChrome_115_PQ_PSK,
-	"firefox":                    utls.HelloFirefox_Auto,
-	"safari":                     utls.HelloSafari_Auto,
-	"ios":                        utls.HelloIOS_Auto,
-	"android":                    utls.HelloAndroid_11_OkHttp,
-	"edge":                       utls.HelloEdge_Auto,
-	"360":                        utls.Hello360_Auto,
-	"qq":                         utls.HelloQQ_Auto,
-	"random":                     {},
-	"randomized":                 utls.HelloRandomized,
+var Fingerprints = map[string]UClientHelloID{
+	"chrome":                     {&utls.HelloChrome_Auto},
+	"chrome_psk":                 {&utls.HelloChrome_100_PSK},
+	"chrome_psk_shuffle":         {&utls.HelloChrome_106_Shuffle},
+	"chrome_padding_psk_shuffle": {&utls.HelloChrome_114_Padding_PSK_Shuf},
+	"chrome_pq":                  {&utls.HelloChrome_115_PQ},
+	"chrome_pq_psk":              {&utls.HelloChrome_115_PQ_PSK},
+	"firefox":                    {&utls.HelloFirefox_Auto},
+	"safari":                     {&utls.HelloSafari_Auto},
+	"ios":                        {&utls.HelloIOS_Auto},
+	"android":                    {&utls.HelloAndroid_11_OkHttp},
+	"edge":                       {&utls.HelloEdge_Auto},
+	"360":                        {&utls.Hello360_Auto},
+	"qq":                         {&utls.HelloQQ_Auto},
+	"random":                     {nil},
+	"randomized":                 {nil},
 }
 
 func init() {
@@ -90,7 +88,7 @@ func init() {
 	randomized := utls.HelloRandomized
 	randomized.Seed, _ = utls.NewPRNGSeed()
 	randomized.Weights = &weights
-	fingerprints["randomized"] = randomized
+	Fingerprints["randomized"] = UClientHelloID{&randomized}
 }
 
 func UCertificates(it tls.Certificate) utls.Certificate {
@@ -105,8 +103,6 @@ func UCertificates(it tls.Certificate) utls.Certificate {
 		Leaf:                        it.Leaf,
 	}
 }
-
-type Config = utls.Config
 
 func UConfig(config *tls.Config) *utls.Config {
 	return &utls.Config{
@@ -156,12 +152,14 @@ func BuildWebsocketHandshakeState(c *UConn) error {
 	return nil
 }
 
-var globalFingerprint string
+func SetGlobalUtlsClient(Client string) {
+	initUtlsClient = Client
+}
 
-func SetGlobalFingerprint(fingerprint string) {
-	globalFingerprint = fingerprint
+func HaveGlobalFingerprint() bool {
+	return len(initUtlsClient) != 0 && initUtlsClient != "none"
 }
 
 func GetGlobalFingerprint() string {
-	return globalFingerprint
+	return initUtlsClient
 }

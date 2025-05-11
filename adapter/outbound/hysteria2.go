@@ -9,20 +9,20 @@ import (
 	"strconv"
 	"time"
 
-	CN "github.com/metacubex/clash/common/net"
-	"github.com/metacubex/clash/common/utils"
-	"github.com/metacubex/clash/component/ca"
-	"github.com/metacubex/clash/component/dialer"
-	"github.com/metacubex/clash/component/proxydialer"
-	tlsC "github.com/metacubex/clash/component/tls"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/log"
-	tuicCommon "github.com/metacubex/clash/transport/tuic/common"
+	CN "github.com/metacubex/mihomo/common/net"
+	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/component/ca"
+	"github.com/metacubex/mihomo/component/dialer"
+	"github.com/metacubex/mihomo/component/proxydialer"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/log"
+	tuicCommon "github.com/metacubex/mihomo/transport/tuic/common"
+
+	"github.com/metacubex/sing-quic/hysteria2"
 
 	"github.com/metacubex/quic-go"
 	"github.com/metacubex/randv2"
-	"github.com/metacubex/sing-quic/hysteria2"
-	M "github.com/metacubex/sing/common/metadata"
+	M "github.com/sagernet/sing/common/metadata"
 )
 
 func init() {
@@ -68,7 +68,9 @@ type Hysteria2Option struct {
 	MaxConnectionReceiveWindow     uint64 `proxy:"max-connection-receive-window,omitempty"`
 }
 
-func (h *Hysteria2) DialContext(ctx context.Context, metadata *C.Metadata) (_ C.Conn, err error) {
+func (h *Hysteria2) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
+	options := h.Base.DialOptions(opts...)
+	h.dialer.SetDialer(dialer.NewDialer(options...))
 	c, err := h.client.DialConn(ctx, M.ParseSocksaddrHostPort(metadata.String(), metadata.DstPort))
 	if err != nil {
 		return nil, err
@@ -76,7 +78,9 @@ func (h *Hysteria2) DialContext(ctx context.Context, metadata *C.Metadata) (_ C.
 	return NewConn(c, h), nil
 }
 
-func (h *Hysteria2) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (_ C.PacketConn, err error) {
+func (h *Hysteria2) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.PacketConn, err error) {
+	options := h.Base.DialOptions(opts...)
+	h.dialer.SetDialer(dialer.NewDialer(options...))
 	pc, err := h.client.ListenPacket(ctx)
 	if err != nil {
 		return nil, err
@@ -104,22 +108,6 @@ func (h *Hysteria2) ProxyInfo() C.ProxyInfo {
 
 func NewHysteria2(option Hysteria2Option) (*Hysteria2, error) {
 	addr := net.JoinHostPort(option.Server, strconv.Itoa(option.Port))
-	outbound := &Hysteria2{
-		Base: &Base{
-			name:   option.Name,
-			addr:   addr,
-			tp:     C.Hysteria2,
-			udp:    true,
-			iface:  option.Interface,
-			rmark:  option.RoutingMark,
-			prefer: C.NewDNSPrefer(option.IPVersion),
-		},
-		option: &option,
-	}
-
-	singDialer := proxydialer.NewByNameSingDialer(option.DialerProxy, dialer.NewDialer(outbound.DialOptions()...))
-	outbound.dialer = singDialer
-
 	var salamanderPassword string
 	if len(option.Obfs) > 0 {
 		if option.ObfsPassword == "" {
@@ -167,6 +155,8 @@ func NewHysteria2(option Hysteria2Option) (*Hysteria2, error) {
 		MaxConnectionReceiveWindow:     option.MaxConnectionReceiveWindow,
 	}
 
+	singDialer := proxydialer.NewByNameSingDialer(option.DialerProxy, dialer.NewDialer())
+
 	clientOptions := hysteria2.ClientOptions{
 		Context:            context.TODO(),
 		Dialer:             singDialer,
@@ -175,7 +165,7 @@ func NewHysteria2(option Hysteria2Option) (*Hysteria2, error) {
 		ReceiveBPS:         StringToBps(option.Down),
 		SalamanderPassword: salamanderPassword,
 		Password:           option.Password,
-		TLSConfig:          tlsC.UConfig(tlsConfig),
+		TLSConfig:          tlsConfig,
 		QUICConfig:         quicConfig,
 		UDPDisabled:        false,
 		CWND:               option.CWND,
@@ -217,7 +207,21 @@ func NewHysteria2(option Hysteria2Option) (*Hysteria2, error) {
 	if err != nil {
 		return nil, err
 	}
-	outbound.client = client
+
+	outbound := &Hysteria2{
+		Base: &Base{
+			name:   option.Name,
+			addr:   addr,
+			tp:     C.Hysteria2,
+			udp:    true,
+			iface:  option.Interface,
+			rmark:  option.RoutingMark,
+			prefer: C.NewDNSPrefer(option.IPVersion),
+		},
+		option: &option,
+		client: client,
+		dialer: singDialer,
+	}
 
 	return outbound, nil
 }

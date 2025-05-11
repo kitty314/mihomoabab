@@ -10,9 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/metacubex/clash/common/picker"
-	"github.com/metacubex/clash/component/resolver"
-	"github.com/metacubex/clash/log"
+	"github.com/metacubex/mihomo/common/picker"
+	"github.com/metacubex/mihomo/component/dialer"
+	"github.com/metacubex/mihomo/component/resolver"
+	"github.com/metacubex/mihomo/log"
 
 	D "github.com/miekg/dns"
 	"github.com/samber/lo"
@@ -114,6 +115,11 @@ func transform(servers []NameServer, resolver *Resolver) []dnsClient {
 			continue
 		}
 
+		var options []dialer.Option
+		if s.Interface != "" {
+			options = append(options, dialer.WithInterface(s.Interface))
+		}
+
 		host, port, _ := net.SplitHostPort(s.Addr)
 		ret = append(ret, &client{
 			Client: &D.Client{
@@ -126,7 +132,7 @@ func transform(servers []NameServer, resolver *Resolver) []dnsClient {
 			},
 			port:   port,
 			host:   host,
-			dialer: newDNSDialer(resolver, s.ProxyAdapter, s.ProxyName),
+			dialer: newDNSDialer(resolver, s.ProxyAdapter, s.ProxyName, options...),
 		})
 	}
 	return ret

@@ -10,14 +10,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/metacubex/clash/adapter"
-	"github.com/metacubex/clash/common/convert"
-	"github.com/metacubex/clash/common/utils"
-	"github.com/metacubex/clash/component/profile/cachefile"
-	"github.com/metacubex/clash/component/resource"
-	C "github.com/metacubex/clash/constant"
-	types "github.com/metacubex/clash/constant/provider"
-	"github.com/metacubex/clash/tunnel/statistic"
+	"github.com/metacubex/mihomo/adapter"
+	"github.com/metacubex/mihomo/common/convert"
+	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/component/profile/cachefile"
+	"github.com/metacubex/mihomo/component/resource"
+	C "github.com/metacubex/mihomo/constant"
+	types "github.com/metacubex/mihomo/constant/provider"
+	"github.com/metacubex/mihomo/tunnel/statistic"
 
 	"github.com/dlclark/regexp2"
 	"gopkg.in/yaml.v3"
@@ -161,7 +161,7 @@ func (pp *proxySetProvider) Close() error {
 	return pp.Fetcher.Close()
 }
 
-func NewProxySetProvider(name string, interval time.Duration, payload []map[string]any, parser resource.Parser[[]C.Proxy], vehicle types.Vehicle, hc *HealthCheck) (*ProxySetProvider, error) {
+func NewProxySetProvider(name string, interval time.Duration, parser resource.Parser[[]C.Proxy], vehicle types.Vehicle, hc *HealthCheck) (*ProxySetProvider, error) {
 	if hc.auto() {
 		go hc.process()
 	}
@@ -172,19 +172,6 @@ func NewProxySetProvider(name string, interval time.Duration, payload []map[stri
 			proxies:     []C.Proxy{},
 			healthCheck: hc,
 		},
-	}
-
-	if len(payload) > 0 { // using as fallback proxies
-		ps := ProxySchema{Proxies: payload}
-		buf, err := yaml.Marshal(ps)
-		if err != nil {
-			return nil, err
-		}
-		proxies, err := parser(buf)
-		if err != nil {
-			return nil, err
-		}
-		pd.proxies = proxies
 	}
 
 	fetcher := resource.NewFetcher[[]C.Proxy](name, interval, vehicle, parser, pd.setProxies)

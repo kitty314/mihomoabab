@@ -19,8 +19,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/metacubex/clash/log"
-	"github.com/metacubex/clash/ntp"
+	"github.com/metacubex/mihomo/log"
+	"github.com/metacubex/mihomo/ntp"
 
 	"github.com/metacubex/randv2"
 	utls "github.com/metacubex/utls"
@@ -37,8 +37,9 @@ type RealityConfig struct {
 	ShortID   [RealityMaxShortIDLen]byte
 }
 
-func GetRealityConn(ctx context.Context, conn net.Conn, fingerprint UClientHelloID, tlsConfig *tls.Config, realityConfig *RealityConfig) (net.Conn, error) {
-	for retry := 0; ; retry++ {
+func GetRealityConn(ctx context.Context, conn net.Conn, clientFingerprint string, tlsConfig *tls.Config, realityConfig *RealityConfig) (net.Conn, error) {
+	retry := 0
+	for fingerprint, exists := GetFingerprint(clientFingerprint); exists; retry++ {
 		verifier := &realityVerifier{
 			serverName: tlsConfig.ServerName,
 		}
@@ -150,6 +151,7 @@ func GetRealityConn(ctx context.Context, conn net.Conn, fingerprint UClientHello
 
 		return uConn, nil
 	}
+	return nil, errors.New("unknown uTLS fingerprint")
 }
 
 func realityClientFallback(uConn net.Conn, serverName string, fingerprint utls.ClientHelloID) {

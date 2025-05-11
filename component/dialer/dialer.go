@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/clash/component/keepalive"
-	"github.com/metacubex/clash/component/resolver"
+	"github.com/metacubex/mihomo/component/keepalive"
+	"github.com/metacubex/mihomo/component/resolver"
 )
 
 const (

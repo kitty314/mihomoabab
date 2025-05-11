@@ -9,16 +9,16 @@ import (
 	"sync"
 	"syscall"
 
-	N "github.com/metacubex/clash/common/net"
-	"github.com/metacubex/clash/common/utils"
-	"github.com/metacubex/clash/component/dialer"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/log"
+	N "github.com/metacubex/mihomo/common/net"
+	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/component/dialer"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/log"
 )
 
 type ProxyAdapter interface {
 	C.ProxyAdapter
-	DialOptions() []dialer.Option
+	DialOptions(opts ...dialer.Option) []dialer.Option
 }
 
 type Base struct {
@@ -59,7 +59,7 @@ func (b *Base) StreamConnContext(ctx context.Context, c net.Conn, metadata *C.Me
 	return c, C.ErrNotSupport
 }
 
-func (b *Base) DialContext(ctx context.Context, metadata *C.Metadata) (C.Conn, error) {
+func (b *Base) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.Conn, error) {
 	return nil, C.ErrNotSupport
 }
 
@@ -69,7 +69,7 @@ func (b *Base) DialContextWithDialer(ctx context.Context, dialer C.Dialer, metad
 }
 
 // ListenPacketContext implements C.ProxyAdapter
-func (b *Base) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (C.PacketConn, error) {
+func (b *Base) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.PacketConn, error) {
 	return nil, C.ErrNotSupport
 }
 
@@ -128,7 +128,7 @@ func (b *Base) Unwrap(metadata *C.Metadata, touch bool) C.Proxy {
 }
 
 // DialOptions return []dialer.Option from struct
-func (b *Base) DialOptions() (opts []dialer.Option) {
+func (b *Base) DialOptions(opts ...dialer.Option) []dialer.Option {
 	if b.iface != "" {
 		opts = append(opts, dialer.WithInterface(b.iface))
 	}
@@ -167,8 +167,8 @@ func (b *Base) Close() error {
 type BasicOption struct {
 	TFO         bool   `proxy:"tfo,omitempty"`
 	MPTCP       bool   `proxy:"mptcp,omitempty"`
-	Interface   string `proxy:"interface-name,omitempty"`
-	RoutingMark int    `proxy:"routing-mark,omitempty"`
+	Interface   string `proxy:"interface-name,omitempty" group:"interface-name,omitempty"`
+	RoutingMark int    `proxy:"routing-mark,omitempty" group:"routing-mark,omitempty"`
 	IPVersion   string `proxy:"ip-version,omitempty"`
 	DialerProxy string `proxy:"dialer-proxy,omitempty"` // don't apply this option into groups, but can set a group name in a proxy
 }
@@ -317,8 +317,8 @@ type autoCloseProxyAdapter struct {
 	closeErr  error
 }
 
-func (p *autoCloseProxyAdapter) DialContext(ctx context.Context, metadata *C.Metadata) (_ C.Conn, err error) {
-	c, err := p.ProxyAdapter.DialContext(ctx, metadata)
+func (p *autoCloseProxyAdapter) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
+	c, err := p.ProxyAdapter.DialContext(ctx, metadata, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -339,8 +339,8 @@ func (p *autoCloseProxyAdapter) DialContextWithDialer(ctx context.Context, diale
 	return c, nil
 }
 
-func (p *autoCloseProxyAdapter) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (_ C.PacketConn, err error) {
-	pc, err := p.ProxyAdapter.ListenPacketContext(ctx, metadata)
+func (p *autoCloseProxyAdapter) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.PacketConn, err error) {
+	pc, err := p.ProxyAdapter.ListenPacketContext(ctx, metadata, opts...)
 	if err != nil {
 		return nil, err
 	}

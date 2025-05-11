@@ -13,22 +13,22 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/clash/common/atomic"
-	"github.com/metacubex/clash/component/dialer"
-	"github.com/metacubex/clash/component/proxydialer"
-	"github.com/metacubex/clash/component/resolver"
-	"github.com/metacubex/clash/component/slowdown"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/dns"
-	"github.com/metacubex/clash/log"
+	"github.com/metacubex/mihomo/common/atomic"
+	"github.com/metacubex/mihomo/component/dialer"
+	"github.com/metacubex/mihomo/component/proxydialer"
+	"github.com/metacubex/mihomo/component/resolver"
+	"github.com/metacubex/mihomo/component/slowdown"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/dns"
+	"github.com/metacubex/mihomo/log"
 
 	amnezia "github.com/metacubex/amneziawg-go/device"
 	wireguard "github.com/metacubex/sing-wireguard"
 	"github.com/metacubex/wireguard-go/device"
 
-	"github.com/metacubex/sing/common/debug"
-	E "github.com/metacubex/sing/common/exceptions"
-	M "github.com/metacubex/sing/common/metadata"
+	"github.com/sagernet/sing/common/debug"
+	E "github.com/sagernet/sing/common/exceptions"
+	M "github.com/sagernet/sing/common/metadata"
 )
 
 type wireguardGoDevice interface {
@@ -166,9 +166,8 @@ func NewWireGuard(option WireGuardOption) (*WireGuard, error) {
 			rmark:  option.RoutingMark,
 			prefer: C.NewDNSPrefer(option.IPVersion),
 		},
+		dialer: proxydialer.NewSlowDownSingDialer(proxydialer.NewByNameSingDialer(option.DialerProxy, dialer.NewDialer()), slowdown.New()),
 	}
-	singDialer := proxydialer.NewSlowDownSingDialer(proxydialer.NewByNameSingDialer(option.DialerProxy, dialer.NewDialer(outbound.DialOptions()...)), slowdown.New())
-	outbound.dialer = singDialer
 
 	var reserved [3]uint8
 	if len(option.Reserved) > 0 {
@@ -489,7 +488,9 @@ func (w *WireGuard) Close() error {
 	return nil
 }
 
-func (w *WireGuard) DialContext(ctx context.Context, metadata *C.Metadata) (_ C.Conn, err error) {
+func (w *WireGuard) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
+	options := w.Base.DialOptions(opts...)
+	w.dialer.SetDialer(dialer.NewDialer(options...))
 	var conn net.Conn
 	if err = w.init(ctx); err != nil {
 		return nil, err
@@ -499,7 +500,6 @@ func (w *WireGuard) DialContext(ctx context.Context, metadata *C.Metadata) (_ C.
 		if w.resolver != nil {
 			r = w.resolver
 		}
-		options := w.DialOptions()
 		options = append(options, dialer.WithResolver(r))
 		options = append(options, dialer.WithNetDialer(wgNetDialer{tunDevice: w.tunDevice}))
 		conn, err = dialer.NewDialer(options...).DialContext(ctx, "tcp", metadata.RemoteAddress())
@@ -515,7 +515,9 @@ func (w *WireGuard) DialContext(ctx context.Context, metadata *C.Metadata) (_ C.
 	return NewConn(conn, w), nil
 }
 
-func (w *WireGuard) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (_ C.PacketConn, err error) {
+func (w *WireGuard) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.PacketConn, err error) {
+	options := w.Base.DialOptions(opts...)
+	w.dialer.SetDialer(dialer.NewDialer(options...))
 	var pc net.PacketConn
 	if err = w.init(ctx); err != nil {
 		return nil, err

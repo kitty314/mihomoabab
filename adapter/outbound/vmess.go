@@ -11,21 +11,21 @@ import (
 	"strings"
 	"sync"
 
-	N "github.com/metacubex/clash/common/net"
-	"github.com/metacubex/clash/common/utils"
-	"github.com/metacubex/clash/component/ca"
-	"github.com/metacubex/clash/component/dialer"
-	"github.com/metacubex/clash/component/proxydialer"
-	"github.com/metacubex/clash/component/resolver"
-	tlsC "github.com/metacubex/clash/component/tls"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/ntp"
-	"github.com/metacubex/clash/transport/gun"
-	clashVMess "github.com/metacubex/clash/transport/vmess"
+	N "github.com/metacubex/mihomo/common/net"
+	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/component/ca"
+	"github.com/metacubex/mihomo/component/dialer"
+	"github.com/metacubex/mihomo/component/proxydialer"
+	"github.com/metacubex/mihomo/component/resolver"
+	tlsC "github.com/metacubex/mihomo/component/tls"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/ntp"
+	"github.com/metacubex/mihomo/transport/gun"
+	mihomoVMess "github.com/metacubex/mihomo/transport/vmess"
 
 	vmess "github.com/metacubex/sing-vmess"
 	"github.com/metacubex/sing-vmess/packetaddr"
-	M "github.com/metacubex/sing/common/metadata"
+	M "github.com/sagernet/sing/common/metadata"
 )
 
 var ErrUDPRemoteAddrMismatch = errors.New("udp packet dropped due to mismatched remote address")
@@ -100,7 +100,7 @@ func (v *Vmess) StreamConnContext(ctx context.Context, c net.Conn, metadata *C.M
 	switch v.option.Network {
 	case "ws":
 		host, port, _ := net.SplitHostPort(v.addr)
-		wsOpts := &clashVMess.WebsocketConfig{
+		wsOpts := &mihomoVMess.WebsocketConfig{
 			Host:                     host,
 			Port:                     port,
 			Path:                     v.option.WSOpts.Path,
@@ -137,12 +137,12 @@ func (v *Vmess) StreamConnContext(ctx context.Context, c net.Conn, metadata *C.M
 				wsOpts.TLSConfig.ServerName = host
 			}
 		}
-		c, err = clashVMess.StreamWebsocketConn(ctx, c, wsOpts)
+		c, err = mihomoVMess.StreamWebsocketConn(ctx, c, wsOpts)
 	case "http":
 		// readability first, so just copy default TLS logic
 		if v.option.TLS {
 			host, _, _ := net.SplitHostPort(v.addr)
-			tlsOpts := &clashVMess.TLSConfig{
+			tlsOpts := &mihomoVMess.TLSConfig{
 				Host:              host,
 				SkipCertVerify:    v.option.SkipCertVerify,
 				ClientFingerprint: v.option.ClientFingerprint,
@@ -153,24 +153,24 @@ func (v *Vmess) StreamConnContext(ctx context.Context, c net.Conn, metadata *C.M
 			if v.option.ServerName != "" {
 				tlsOpts.Host = v.option.ServerName
 			}
-			c, err = clashVMess.StreamTLSConn(ctx, c, tlsOpts)
+			c, err = mihomoVMess.StreamTLSConn(ctx, c, tlsOpts)
 			if err != nil {
 				return nil, err
 			}
 		}
 
 		host, _, _ := net.SplitHostPort(v.addr)
-		httpOpts := &clashVMess.HTTPConfig{
+		httpOpts := &mihomoVMess.HTTPConfig{
 			Host:    host,
 			Method:  v.option.HTTPOpts.Method,
 			Path:    v.option.HTTPOpts.Path,
 			Headers: v.option.HTTPOpts.Headers,
 		}
 
-		c = clashVMess.StreamHTTPConn(c, httpOpts)
+		c = mihomoVMess.StreamHTTPConn(c, httpOpts)
 	case "h2":
 		host, _, _ := net.SplitHostPort(v.addr)
-		tlsOpts := clashVMess.TLSConfig{
+		tlsOpts := mihomoVMess.TLSConfig{
 			Host:              host,
 			SkipCertVerify:    v.option.SkipCertVerify,
 			FingerPrint:       v.option.Fingerprint,
@@ -183,24 +183,24 @@ func (v *Vmess) StreamConnContext(ctx context.Context, c net.Conn, metadata *C.M
 			tlsOpts.Host = v.option.ServerName
 		}
 
-		c, err = clashVMess.StreamTLSConn(ctx, c, &tlsOpts)
+		c, err = mihomoVMess.StreamTLSConn(ctx, c, &tlsOpts)
 		if err != nil {
 			return nil, err
 		}
 
-		h2Opts := &clashVMess.H2Config{
+		h2Opts := &mihomoVMess.H2Config{
 			Hosts: v.option.HTTP2Opts.Host,
 			Path:  v.option.HTTP2Opts.Path,
 		}
 
-		c, err = clashVMess.StreamH2Conn(ctx, c, h2Opts)
+		c, err = mihomoVMess.StreamH2Conn(ctx, c, h2Opts)
 	case "grpc":
 		c, err = gun.StreamGunWithConn(c, v.gunTLSConfig, v.gunConfig, v.realityConfig)
 	default:
 		// handle TLS
 		if v.option.TLS {
 			host, _, _ := net.SplitHostPort(v.addr)
-			tlsOpts := &clashVMess.TLSConfig{
+			tlsOpts := &mihomoVMess.TLSConfig{
 				Host:              host,
 				SkipCertVerify:    v.option.SkipCertVerify,
 				FingerPrint:       v.option.Fingerprint,
@@ -213,7 +213,7 @@ func (v *Vmess) StreamConnContext(ctx context.Context, c net.Conn, metadata *C.M
 				tlsOpts.Host = v.option.ServerName
 			}
 
-			c, err = clashVMess.StreamTLSConn(ctx, c, tlsOpts)
+			c, err = mihomoVMess.StreamTLSConn(ctx, c, tlsOpts)
 		}
 	}
 
@@ -280,10 +280,10 @@ func (v *Vmess) streamConnContext(ctx context.Context, c net.Conn, metadata *C.M
 }
 
 // DialContext implements C.ProxyAdapter
-func (v *Vmess) DialContext(ctx context.Context, metadata *C.Metadata) (_ C.Conn, err error) {
+func (v *Vmess) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
 	var c net.Conn
 	// gun transport
-	if v.transport != nil {
+	if v.transport != nil && dialer.IsZeroOptions(opts) {
 		c, err = gun.StreamGunWithTransport(v.transport, v.gunConfig)
 		if err != nil {
 			return nil, err
@@ -299,7 +299,7 @@ func (v *Vmess) DialContext(ctx context.Context, metadata *C.Metadata) (_ C.Conn
 
 		return NewConn(c, v), nil
 	}
-	return v.DialContextWithDialer(ctx, dialer.NewDialer(v.DialOptions()...), metadata)
+	return v.DialContextWithDialer(ctx, dialer.NewDialer(v.Base.DialOptions(opts...)...), metadata)
 }
 
 // DialContextWithDialer implements C.ProxyAdapter
@@ -323,7 +323,7 @@ func (v *Vmess) DialContextWithDialer(ctx context.Context, dialer C.Dialer, meta
 }
 
 // ListenPacketContext implements C.ProxyAdapter
-func (v *Vmess) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (_ C.PacketConn, err error) {
+func (v *Vmess) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.PacketConn, err error) {
 	// vmess use stream-oriented udp with a special address, so we need a net.UDPAddr
 	if !metadata.Resolved() {
 		ip, err := resolver.ResolveIP(ctx, metadata.Host)
@@ -334,7 +334,7 @@ func (v *Vmess) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (
 	}
 	var c net.Conn
 	// gun transport
-	if v.transport != nil {
+	if v.transport != nil && dialer.IsZeroOptions(opts) {
 		c, err = gun.StreamGunWithTransport(v.transport, v.gunConfig)
 		if err != nil {
 			return nil, err
@@ -349,7 +349,7 @@ func (v *Vmess) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (
 		}
 		return v.ListenPacketOnStreamConn(ctx, c, metadata)
 	}
-	return v.ListenPacketWithDialer(ctx, dialer.NewDialer(v.DialOptions()...), metadata)
+	return v.ListenPacketWithDialer(ctx, dialer.NewDialer(v.Base.DialOptions(opts...)...), metadata)
 }
 
 // ListenPacketWithDialer implements C.ProxyAdapter
@@ -482,7 +482,7 @@ func NewVmess(option VmessOption) (*Vmess, error) {
 	case "grpc":
 		dialFn := func(ctx context.Context, network, addr string) (net.Conn, error) {
 			var err error
-			var cDialer C.Dialer = dialer.NewDialer(v.DialOptions()...)
+			var cDialer C.Dialer = dialer.NewDialer(v.Base.DialOptions()...)
 			if len(v.option.DialerProxy) > 0 {
 				cDialer, err = proxydialer.NewByName(v.option.DialerProxy, cDialer)
 				if err != nil {

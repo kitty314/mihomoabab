@@ -11,11 +11,11 @@ import (
 	"net/http"
 	"strconv"
 
-	N "github.com/metacubex/clash/common/net"
-	"github.com/metacubex/clash/component/ca"
-	"github.com/metacubex/clash/component/dialer"
-	"github.com/metacubex/clash/component/proxydialer"
-	C "github.com/metacubex/clash/constant"
+	N "github.com/metacubex/mihomo/common/net"
+	"github.com/metacubex/mihomo/component/ca"
+	"github.com/metacubex/mihomo/component/dialer"
+	"github.com/metacubex/mihomo/component/proxydialer"
+	C "github.com/metacubex/mihomo/constant"
 )
 
 type Http struct {
@@ -58,8 +58,8 @@ func (h *Http) StreamConnContext(ctx context.Context, c net.Conn, metadata *C.Me
 }
 
 // DialContext implements C.ProxyAdapter
-func (h *Http) DialContext(ctx context.Context, metadata *C.Metadata) (_ C.Conn, err error) {
-	return h.DialContextWithDialer(ctx, dialer.NewDialer(h.DialOptions()...), metadata)
+func (h *Http) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
+	return h.DialContextWithDialer(ctx, dialer.NewDialer(h.Base.DialOptions(opts...)...), metadata)
 }
 
 // DialContextWithDialer implements C.ProxyAdapter

@@ -5,7 +5,7 @@ import (
 	"net/netip"
 	"strconv"
 
-	"github.com/metacubex/clash/log"
+	"github.com/metacubex/mihomo/log"
 )
 
 var (

@@ -5,12 +5,12 @@ import (
 	"crypto/tls"
 	"net"
 
-	"github.com/metacubex/clash/component/ca"
-	tlsC "github.com/metacubex/clash/component/tls"
-	"github.com/metacubex/clash/log"
+	"github.com/metacubex/mihomo/component/ca"
+	tlsC "github.com/metacubex/mihomo/component/tls"
+	"github.com/metacubex/mihomo/log"
 
 	"github.com/metacubex/sing-shadowtls"
-	"golang.org/x/exp/slices"
+	utls "github.com/metacubex/utls"
 )
 
 const (
@@ -19,7 +19,6 @@ const (
 
 var (
 	DefaultALPN = []string{"h2", "http/1.1"}
-	WsALPN      = []string{"http/1.1"}
 )
 
 type ShadowTLSOption struct {
@@ -29,18 +28,14 @@ type ShadowTLSOption struct {
 	ClientFingerprint string
 	SkipCertVerify    bool
 	Version           int
-	ALPN              []string
 }
 
 func NewShadowTLS(ctx context.Context, conn net.Conn, option *ShadowTLSOption) (net.Conn, error) {
 	tlsConfig := &tls.Config{
-		NextProtos:         option.ALPN,
+		NextProtos:         DefaultALPN,
 		MinVersion:         tls.VersionTLS12,
 		InsecureSkipVerify: option.SkipCertVerify,
 		ServerName:         option.Host,
-	}
-	if option.Version == 1 {
-		tlsConfig.MaxVersion = tls.VersionTLS12 // ShadowTLS v1 only support TLS 1.2
 	}
 
 	var err error
@@ -66,21 +61,17 @@ func uTLSHandshakeFunc(config *tls.Config, clientFingerprint string) shadowtls.T
 	return func(ctx context.Context, conn net.Conn, sessionIDGenerator shadowtls.TLSSessionIDGeneratorFunc) error {
 		tlsConfig := tlsC.UConfig(config)
 		tlsConfig.SessionIDGenerator = sessionIDGenerator
-		if config.MaxVersion == tls.VersionTLS12 { // for ShadowTLS v1
-			tlsConn := tlsC.Client(conn, tlsConfig)
-			return tlsConn.HandshakeContext(ctx)
+		clientFingerprint := clientFingerprint
+		if tlsC.HaveGlobalFingerprint() && len(clientFingerprint) == 0 {
+			clientFingerprint = tlsC.GetGlobalFingerprint()
 		}
-		if clientFingerprint, ok := tlsC.GetFingerprint(clientFingerprint); ok {
-			tlsConn := tlsC.UClient(conn, tlsConfig, clientFingerprint)
-			if slices.Equal(tlsConfig.NextProtos, WsALPN) {
-				err := tlsC.BuildWebsocketHandshakeState(tlsConn)
-				if err != nil {
-					return err
-				}
+		if len(clientFingerprint) != 0 {
+			if fingerprint, exists := tlsC.GetFingerprint(clientFingerprint); exists {
+				tlsConn := tlsC.UClient(conn, tlsConfig, fingerprint)
+				return tlsConn.HandshakeContext(ctx)
 			}
-			return tlsConn.HandshakeContext(ctx)
 		}
-		tlsConn := tlsC.Client(conn, tlsConfig)
+		tlsConn := utls.Client(conn, tlsConfig)
 		return tlsConn.HandshakeContext(ctx)
 	}
 }

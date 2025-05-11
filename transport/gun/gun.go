@@ -18,11 +18,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/clash/common/atomic"
-	"github.com/metacubex/clash/common/buf"
-	"github.com/metacubex/clash/common/pool"
-	tlsC "github.com/metacubex/clash/component/tls"
-	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/mihomo/common/atomic"
+	"github.com/metacubex/mihomo/common/buf"
+	"github.com/metacubex/mihomo/common/pool"
+	tlsC "github.com/metacubex/mihomo/component/tls"
+	C "github.com/metacubex/mihomo/constant"
 
 	"golang.org/x/net/http2"
 )
@@ -237,19 +237,25 @@ func NewHTTP2Client(dialFn DialFn, tlsConfig *tls.Config, clientFingerprint stri
 			return pconn, nil
 		}
 
-		if clientFingerprint, ok := tlsC.GetFingerprint(clientFingerprint); ok {
+		clientFingerprint := clientFingerprint
+		if tlsC.HaveGlobalFingerprint() && len(clientFingerprint) == 0 {
+			clientFingerprint = tlsC.GetGlobalFingerprint()
+		}
+		if len(clientFingerprint) != 0 {
 			if realityConfig == nil {
-				tlsConn := tlsC.UClient(pconn, tlsC.UConfig(cfg), clientFingerprint)
-				if err := tlsConn.HandshakeContext(ctx); err != nil {
-					pconn.Close()
-					return nil, err
+				if fingerprint, exists := tlsC.GetFingerprint(clientFingerprint); exists {
+					utlsConn := tlsC.UClient(pconn, tlsC.UConfig(cfg), fingerprint)
+					if err := utlsConn.HandshakeContext(ctx); err != nil {
+						pconn.Close()
+						return nil, err
+					}
+					state := utlsConn.ConnectionState()
+					if p := state.NegotiatedProtocol; p != http2.NextProtoTLS {
+						utlsConn.Close()
+						return nil, fmt.Errorf("http2: unexpected ALPN protocol %s, want %s", p, http2.NextProtoTLS)
+					}
+					return utlsConn, nil
 				}
-				state := tlsConn.ConnectionState()
-				if p := state.NegotiatedProtocol; p != http2.NextProtoTLS {
-					tlsConn.Close()
-					return nil, fmt.Errorf("http2: unexpected ALPN protocol %s, want %s", p, http2.NextProtoTLS)
-				}
-				return tlsConn, nil
 			} else {
 				realityConn, err := tlsC.GetRealityConn(ctx, pconn, clientFingerprint, cfg, realityConfig)
 				if err != nil {

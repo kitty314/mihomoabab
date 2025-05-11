@@ -9,16 +9,16 @@ import (
 	"net/http"
 	"strconv"
 
-	N "github.com/metacubex/clash/common/net"
-	"github.com/metacubex/clash/component/ca"
-	"github.com/metacubex/clash/component/dialer"
-	"github.com/metacubex/clash/component/proxydialer"
-	tlsC "github.com/metacubex/clash/component/tls"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/transport/gun"
-	"github.com/metacubex/clash/transport/shadowsocks/core"
-	"github.com/metacubex/clash/transport/trojan"
-	"github.com/metacubex/clash/transport/vmess"
+	N "github.com/metacubex/mihomo/common/net"
+	"github.com/metacubex/mihomo/component/ca"
+	"github.com/metacubex/mihomo/component/dialer"
+	"github.com/metacubex/mihomo/component/proxydialer"
+	tlsC "github.com/metacubex/mihomo/component/tls"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/transport/gun"
+	"github.com/metacubex/mihomo/transport/shadowsocks/core"
+	"github.com/metacubex/mihomo/transport/trojan"
+	"github.com/metacubex/mihomo/transport/vmess"
 )
 
 type Trojan struct {
@@ -165,10 +165,10 @@ func (t *Trojan) writeHeaderContext(ctx context.Context, c net.Conn, metadata *C
 }
 
 // DialContext implements C.ProxyAdapter
-func (t *Trojan) DialContext(ctx context.Context, metadata *C.Metadata) (_ C.Conn, err error) {
+func (t *Trojan) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
 	var c net.Conn
 	// gun transport
-	if t.transport != nil {
+	if t.transport != nil && dialer.IsZeroOptions(opts) {
 		c, err = gun.StreamGunWithTransport(t.transport, t.gunConfig)
 		if err != nil {
 			return nil, err
@@ -184,7 +184,7 @@ func (t *Trojan) DialContext(ctx context.Context, metadata *C.Metadata) (_ C.Con
 
 		return NewConn(c, t), nil
 	}
-	return t.DialContextWithDialer(ctx, dialer.NewDialer(t.DialOptions()...), metadata)
+	return t.DialContextWithDialer(ctx, dialer.NewDialer(t.Base.DialOptions(opts...)...), metadata)
 }
 
 // DialContextWithDialer implements C.ProxyAdapter
@@ -213,11 +213,11 @@ func (t *Trojan) DialContextWithDialer(ctx context.Context, dialer C.Dialer, met
 }
 
 // ListenPacketContext implements C.ProxyAdapter
-func (t *Trojan) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (_ C.PacketConn, err error) {
+func (t *Trojan) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.PacketConn, err error) {
 	var c net.Conn
 
 	// grpc transport
-	if t.transport != nil {
+	if t.transport != nil && dialer.IsZeroOptions(opts) {
 		c, err = gun.StreamGunWithTransport(t.transport, t.gunConfig)
 		if err != nil {
 			return nil, fmt.Errorf("%s connect error: %w", t.addr, err)
@@ -234,7 +234,7 @@ func (t *Trojan) ListenPacketContext(ctx context.Context, metadata *C.Metadata) 
 		pc := trojan.NewPacketConn(c)
 		return newPacketConn(pc, t), err
 	}
-	return t.ListenPacketWithDialer(ctx, dialer.NewDialer(t.DialOptions()...), metadata)
+	return t.ListenPacketWithDialer(ctx, dialer.NewDialer(t.Base.DialOptions(opts...)...), metadata)
 }
 
 // ListenPacketWithDialer implements C.ProxyAdapter
@@ -295,10 +295,6 @@ func (t *Trojan) Close() error {
 func NewTrojan(option TrojanOption) (*Trojan, error) {
 	addr := net.JoinHostPort(option.Server, strconv.Itoa(option.Port))
 
-	if option.SNI == "" {
-		option.SNI = option.Server
-	}
-
 	t := &Trojan{
 		Base: &Base{
 			name:   option.Name,
@@ -338,7 +334,7 @@ func NewTrojan(option TrojanOption) (*Trojan, error) {
 	if option.Network == "grpc" {
 		dialFn := func(ctx context.Context, network, addr string) (net.Conn, error) {
 			var err error
-			var cDialer C.Dialer = dialer.NewDialer(t.DialOptions()...)
+			var cDialer C.Dialer = dialer.NewDialer(t.Base.DialOptions()...)
 			if len(t.option.DialerProxy) > 0 {
 				cDialer, err = proxydialer.NewByName(t.option.DialerProxy, cDialer)
 				if err != nil {

@@ -7,22 +7,22 @@ import (
 	"net"
 	"strconv"
 
-	N "github.com/metacubex/clash/common/net"
-	"github.com/metacubex/clash/common/structure"
-	"github.com/metacubex/clash/component/dialer"
-	"github.com/metacubex/clash/component/proxydialer"
-	"github.com/metacubex/clash/component/resolver"
-	C "github.com/metacubex/clash/constant"
-	gost "github.com/metacubex/clash/transport/gost-plugin"
-	"github.com/metacubex/clash/transport/restls"
-	obfs "github.com/metacubex/clash/transport/simple-obfs"
-	shadowtls "github.com/metacubex/clash/transport/sing-shadowtls"
-	v2rayObfs "github.com/metacubex/clash/transport/v2ray-plugin"
+	N "github.com/metacubex/mihomo/common/net"
+	"github.com/metacubex/mihomo/common/structure"
+	"github.com/metacubex/mihomo/component/dialer"
+	"github.com/metacubex/mihomo/component/proxydialer"
+	"github.com/metacubex/mihomo/component/resolver"
+	C "github.com/metacubex/mihomo/constant"
+	gost "github.com/metacubex/mihomo/transport/gost-plugin"
+	"github.com/metacubex/mihomo/transport/restls"
+	obfs "github.com/metacubex/mihomo/transport/simple-obfs"
+	shadowtls "github.com/metacubex/mihomo/transport/sing-shadowtls"
+	v2rayObfs "github.com/metacubex/mihomo/transport/v2ray-plugin"
 
 	shadowsocks "github.com/metacubex/sing-shadowsocks2"
-	"github.com/metacubex/sing/common/bufio"
-	M "github.com/metacubex/sing/common/metadata"
-	"github.com/metacubex/sing/common/uot"
+	"github.com/sagernet/sing/common/bufio"
+	M "github.com/sagernet/sing/common/metadata"
+	"github.com/sagernet/sing/common/uot"
 )
 
 type ShadowSocks struct {
@@ -84,12 +84,11 @@ type gostObfsOption struct {
 }
 
 type shadowTLSOption struct {
-	Password       string   `obfs:"password,omitempty"`
-	Host           string   `obfs:"host"`
-	Fingerprint    string   `obfs:"fingerprint,omitempty"`
-	SkipCertVerify bool     `obfs:"skip-cert-verify,omitempty"`
-	Version        int      `obfs:"version,omitempty"`
-	ALPN           []string `obfs:"alpn,omitempty"`
+	Password       string `obfs:"password"`
+	Host           string `obfs:"host"`
+	Fingerprint    string `obfs:"fingerprint,omitempty"`
+	SkipCertVerify bool   `obfs:"skip-cert-verify,omitempty"`
+	Version        int    `obfs:"version,omitempty"`
 }
 
 type restlsOption struct {
@@ -155,8 +154,8 @@ func (ss *ShadowSocks) StreamConnContext(ctx context.Context, c net.Conn, metada
 }
 
 // DialContext implements C.ProxyAdapter
-func (ss *ShadowSocks) DialContext(ctx context.Context, metadata *C.Metadata) (_ C.Conn, err error) {
-	return ss.DialContextWithDialer(ctx, dialer.NewDialer(ss.DialOptions()...), metadata)
+func (ss *ShadowSocks) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
+	return ss.DialContextWithDialer(ctx, dialer.NewDialer(ss.Base.DialOptions(opts...)...), metadata)
 }
 
 // DialContextWithDialer implements C.ProxyAdapter
@@ -181,8 +180,8 @@ func (ss *ShadowSocks) DialContextWithDialer(ctx context.Context, dialer C.Diale
 }
 
 // ListenPacketContext implements C.ProxyAdapter
-func (ss *ShadowSocks) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (C.PacketConn, error) {
-	return ss.ListenPacketWithDialer(ctx, dialer.NewDialer(ss.DialOptions()...), metadata)
+func (ss *ShadowSocks) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.PacketConn, error) {
+	return ss.ListenPacketWithDialer(ctx, dialer.NewDialer(ss.Base.DialOptions(opts...)...), metadata)
 }
 
 // ListenPacketWithDialer implements C.ProxyAdapter
@@ -342,12 +341,6 @@ func NewShadowSocks(option ShadowSocksOption) (*ShadowSocks, error) {
 			ClientFingerprint: option.ClientFingerprint,
 			SkipCertVerify:    opt.SkipCertVerify,
 			Version:           opt.Version,
-		}
-
-		if opt.ALPN != nil { // structure's Decode will ensure value not nil when input has value even it was set an empty array
-			shadowTLSOpt.ALPN = opt.ALPN
-		} else {
-			shadowTLSOpt.ALPN = shadowtls.DefaultALPN
 		}
 	} else if option.Plugin == restls.Mode {
 		obfsMode = restls.Mode

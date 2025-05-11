@@ -8,14 +8,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/clash/adapter/outbound"
-	"github.com/metacubex/clash/common/atomic"
-	"github.com/metacubex/clash/common/utils"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/constant/provider"
-	types "github.com/metacubex/clash/constant/provider"
-	"github.com/metacubex/clash/log"
-	"github.com/metacubex/clash/tunnel"
+	"github.com/metacubex/mihomo/adapter/outbound"
+	"github.com/metacubex/mihomo/common/atomic"
+	"github.com/metacubex/mihomo/common/utils"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/constant/provider"
+	types "github.com/metacubex/mihomo/constant/provider"
+	"github.com/metacubex/mihomo/log"
+	"github.com/metacubex/mihomo/tunnel"
 
 	"github.com/dlclark/regexp2"
 	"golang.org/x/exp/slices"
@@ -41,47 +41,53 @@ type GroupBase struct {
 }
 
 type GroupBaseOption struct {
-	Name           string
-	Type           C.AdapterType
-	Filter         string
-	ExcludeFilter  string
-	ExcludeType    string
+	outbound.BaseOption
+	filter         string
+	excludeFilter  string
+	excludeType    string
 	TestTimeout    int
-	MaxFailedTimes int
-	Providers      []provider.ProxyProvider
+	maxFailedTimes int
+	providers      []provider.ProxyProvider
 }
 
 func NewGroupBase(opt GroupBaseOption) *GroupBase {
+	if opt.RoutingMark != 0 {
+		log.Warnln("The group [%s] with routing-mark configuration is deprecated, please set it directly on the proxy instead", opt.Name)
+	}
+	if opt.Interface != "" {
+		log.Warnln("The group [%s] with interface-name configuration is deprecated, please set it directly on the proxy instead", opt.Name)
+	}
+
 	var excludeTypeArray []string
-	if opt.ExcludeType != "" {
-		excludeTypeArray = strings.Split(opt.ExcludeType, "|")
+	if opt.excludeType != "" {
+		excludeTypeArray = strings.Split(opt.excludeType, "|")
 	}
 
 	var excludeFilterRegs []*regexp2.Regexp
-	if opt.ExcludeFilter != "" {
-		for _, excludeFilter := range strings.Split(opt.ExcludeFilter, "`") {
+	if opt.excludeFilter != "" {
+		for _, excludeFilter := range strings.Split(opt.excludeFilter, "`") {
 			excludeFilterReg := regexp2.MustCompile(excludeFilter, regexp2.None)
 			excludeFilterRegs = append(excludeFilterRegs, excludeFilterReg)
 		}
 	}
 
 	var filterRegs []*regexp2.Regexp
-	if opt.Filter != "" {
-		for _, filter := range strings.Split(opt.Filter, "`") {
+	if opt.filter != "" {
+		for _, filter := range strings.Split(opt.filter, "`") {
 			filterReg := regexp2.MustCompile(filter, regexp2.None)
 			filterRegs = append(filterRegs, filterReg)
 		}
 	}
 
 	gb := &GroupBase{
-		Base:              outbound.NewBase(outbound.BaseOption{Name: opt.Name, Type: opt.Type}),
+		Base:              outbound.NewBase(opt.BaseOption),
 		filterRegs:        filterRegs,
 		excludeFilterRegs: excludeFilterRegs,
 		excludeTypeArray:  excludeTypeArray,
-		providers:         opt.Providers,
+		providers:         opt.providers,
 		failedTesting:     atomic.NewBool(false),
 		TestTimeout:       opt.TestTimeout,
-		maxFailedTimes:    opt.MaxFailedTimes,
+		maxFailedTimes:    opt.maxFailedTimes,
 	}
 
 	if gb.TestTimeout == 0 {

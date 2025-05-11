@@ -4,16 +4,16 @@ import (
 	"context"
 	"errors"
 
-	CN "github.com/metacubex/clash/common/net"
-	"github.com/metacubex/clash/component/dialer"
-	"github.com/metacubex/clash/component/proxydialer"
-	"github.com/metacubex/clash/component/resolver"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/log"
+	CN "github.com/metacubex/mihomo/common/net"
+	"github.com/metacubex/mihomo/component/dialer"
+	"github.com/metacubex/mihomo/component/proxydialer"
+	"github.com/metacubex/mihomo/component/resolver"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/log"
 
-	mux "github.com/metacubex/sing-mux"
-	E "github.com/metacubex/sing/common/exceptions"
-	M "github.com/metacubex/sing/common/metadata"
+	mux "github.com/sagernet/sing-mux"
+	E "github.com/sagernet/sing/common/exceptions"
+	M "github.com/sagernet/sing/common/metadata"
 )
 
 type SingMux struct {
@@ -41,7 +41,9 @@ type BrutalOption struct {
 	Down    string `proxy:"down,omitempty"`
 }
 
-func (s *SingMux) DialContext(ctx context.Context, metadata *C.Metadata) (_ C.Conn, err error) {
+func (s *SingMux) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.Conn, err error) {
+	options := s.ProxyAdapter.DialOptions(opts...)
+	s.dialer.SetDialer(dialer.NewDialer(options...))
 	c, err := s.client.DialContext(ctx, "tcp", M.ParseSocksaddrHostPort(metadata.String(), metadata.DstPort))
 	if err != nil {
 		return nil, err
@@ -49,10 +51,12 @@ func (s *SingMux) DialContext(ctx context.Context, metadata *C.Metadata) (_ C.Co
 	return NewConn(c, s), err
 }
 
-func (s *SingMux) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (_ C.PacketConn, err error) {
+func (s *SingMux) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (_ C.PacketConn, err error) {
 	if s.onlyTcp {
-		return s.ProxyAdapter.ListenPacketContext(ctx, metadata)
+		return s.ProxyAdapter.ListenPacketContext(ctx, metadata, opts...)
 	}
+	options := s.ProxyAdapter.DialOptions(opts...)
+	s.dialer.SetDialer(dialer.NewDialer(options...))
 
 	// sing-mux use stream-oriented udp with a special address, so we need a net.UDPAddr
 	if !metadata.Resolved() {
@@ -105,7 +109,7 @@ func NewSingMux(option SingMuxOption, proxy ProxyAdapter) (ProxyAdapter, error) 
 	// TODO
 	// "TCP Brutal is only supported on Linux-based systems"
 
-	singDialer := proxydialer.NewSingDialer(proxy, dialer.NewDialer(proxy.DialOptions()...), option.Statistic)
+	singDialer := proxydialer.NewSingDialer(proxy, dialer.NewDialer(), option.Statistic)
 	client, err := mux.NewClient(mux.Options{
 		Dialer:         singDialer,
 		Logger:         log.SingLogger,

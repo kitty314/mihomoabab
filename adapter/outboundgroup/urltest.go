@@ -6,12 +6,14 @@ import (
 	"errors"
 	"time"
 
-	"github.com/metacubex/clash/common/callback"
-	N "github.com/metacubex/clash/common/net"
-	"github.com/metacubex/clash/common/singledo"
-	"github.com/metacubex/clash/common/utils"
-	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/constant/provider"
+	"github.com/metacubex/mihomo/adapter/outbound"
+	"github.com/metacubex/mihomo/common/callback"
+	N "github.com/metacubex/mihomo/common/net"
+	"github.com/metacubex/mihomo/common/singledo"
+	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/component/dialer"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/constant/provider"
 )
 
 type urlTestOption func(*URLTest)
@@ -60,9 +62,9 @@ func (u *URLTest) ForceSet(name string) {
 }
 
 // DialContext implements C.ProxyAdapter
-func (u *URLTest) DialContext(ctx context.Context, metadata *C.Metadata) (c C.Conn, err error) {
+func (u *URLTest) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (c C.Conn, err error) {
 	proxy := u.fast(true)
-	c, err = proxy.DialContext(ctx, metadata)
+	c, err = proxy.DialContext(ctx, metadata, u.Base.DialOptions(opts...)...)
 	if err == nil {
 		c.AppendToChains(u)
 	} else {
@@ -83,9 +85,9 @@ func (u *URLTest) DialContext(ctx context.Context, metadata *C.Metadata) (c C.Co
 }
 
 // ListenPacketContext implements C.ProxyAdapter
-func (u *URLTest) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (C.PacketConn, error) {
+func (u *URLTest) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.PacketConn, error) {
 	proxy := u.fast(true)
-	pc, err := proxy.ListenPacketContext(ctx, metadata)
+	pc, err := proxy.ListenPacketContext(ctx, metadata, u.Base.DialOptions(opts...)...)
 	if err == nil {
 		pc.AppendToChains(u)
 	} else {
@@ -205,14 +207,19 @@ func parseURLTestOption(config map[string]any) []urlTestOption {
 func NewURLTest(option *GroupCommonOption, providers []provider.ProxyProvider, options ...urlTestOption) *URLTest {
 	urlTest := &URLTest{
 		GroupBase: NewGroupBase(GroupBaseOption{
-			Name:           option.Name,
-			Type:           C.URLTest,
-			Filter:         option.Filter,
-			ExcludeFilter:  option.ExcludeFilter,
-			ExcludeType:    option.ExcludeType,
-			TestTimeout:    option.TestTimeout,
-			MaxFailedTimes: option.MaxFailedTimes,
-			Providers:      providers,
+			outbound.BaseOption{
+				Name:        option.Name,
+				Type:        C.URLTest,
+				Interface:   option.Interface,
+				RoutingMark: option.RoutingMark,
+			},
+
+			option.Filter,
+			option.ExcludeFilter,
+			option.ExcludeType,
+			option.TestTimeout,
+			option.MaxFailedTimes,
+			providers,
 		}),
 		fastSingle:     singledo.NewSingle[C.Proxy](time.Second * 10),
 		disableUDP:     option.DisableUDP,
