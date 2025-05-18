@@ -1,6 +1,7 @@
 package constant
 
 import (
+	"fmt"
 	"os"
 	P "path"
 	"path/filepath"
@@ -37,13 +38,23 @@ var Path = func() *path {
 		}
 	}
 
-	return &path{homeDir: homeDir, configFile: "config.yaml", allowUnsafePath: allowUnsafePath}
+	var safePaths []string
+	for _, safePath := range filepath.SplitList(os.Getenv("SAFE_PATHS")) {
+		safePath = strings.TrimSpace(safePath)
+		if len(safePath) == 0 {
+			continue
+		}
+		safePaths = append(safePaths, safePath)
+	}
+
+	return &path{homeDir: homeDir, configFile: "config.yaml", allowUnsafePath: allowUnsafePath, safePaths: safePaths}
 }()
 
 type path struct {
 	homeDir         string
 	configFile      string
 	allowUnsafePath bool
+	safePaths       []string
 }
 
 // SetHomeDir is used to set the configuration path
@@ -72,19 +83,37 @@ func (p *path) Resolve(path string) string {
 	return path
 }
 
-// IsSafePath return true if path is a subpath of homedir
+// IsSafePath return true if path is a subpath of homedir (or in the SAFE_PATHS environment variable)
 func (p *path) IsSafePath(path string) bool {
 	if p.allowUnsafePath || features.CMFA {
 		return true
 	}
-	homedir := p.HomeDir()
 	path = p.Resolve(path)
-	rel, err := filepath.Rel(homedir, path)
-	if err != nil {
-		return false
+	for _, safePath := range p.SafePaths() {
+		if rel, err := filepath.Rel(safePath, path); err == nil {
+			if filepath.IsLocal(rel) {
+				return true
+			}
+		}
 	}
+	return false
+}
 
-	return !strings.Contains(rel, "..")
+func (p *path) SafePaths() []string {
+	return append([]string{p.homeDir}, p.safePaths...) // add homedir to safePaths
+}
+
+func (p *path) ErrNotSafePath(path string) error {
+	return ErrNotSafePath{Path: path, SafePaths: p.SafePaths()}
+}
+
+type ErrNotSafePath struct {
+	Path      string
+	SafePaths []string
+}
+
+func (e ErrNotSafePath) Error() string {
+	return fmt.Sprintf("path is not subpath of home directory or SAFE_PATHS: %s \n allowed paths: %s", e.Path, e.SafePaths)
 }
 
 func (p *path) GetPathByHash(prefix, name string) string {

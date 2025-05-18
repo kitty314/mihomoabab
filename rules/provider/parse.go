@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -10,10 +9,6 @@ import (
 	C "github.com/metacubex/clash/constant"
 	P "github.com/metacubex/clash/constant/provider"
 	"github.com/metacubex/clash/rules/common"
-)
-
-var (
-	errSubPath = errors.New("path is not subpath of home directory")
 )
 
 type ruleProviderSchema struct {
@@ -53,7 +48,7 @@ func ParseRuleProvider(name string, mapping map[string]any, parse common.ParseRu
 		if schema.Path != "" {
 			path = C.Path.Resolve(schema.Path)
 			if !C.Path.IsSafePath(path) {
-				return nil, fmt.Errorf("%w: %s", errSubPath, path)
+				return nil, C.Path.ErrNotSafePath(path)
 			}
 		}
 		vehicle = resource.NewHTTPVehicle(schema.URL, path, schema.Proxy, nil, resource.DefaultHttpTimeout, schema.SizeLimit)
@@ -63,5 +58,7 @@ func ParseRuleProvider(name string, mapping map[string]any, parse common.ParseRu
 		return nil, fmt.Errorf("unsupported vehicle type: %s", schema.Type)
 	}
 
-	return NewRuleSetProvider(name, behavior, format, time.Duration(uint(schema.Interval))*time.Second, vehicle, parse), nil
+	interval := time.Duration(uint(schema.Interval)) * time.Second
+
+	return NewRuleSetProvider(name, behavior, format, interval, vehicle, schema.Payload, parse), nil
 }

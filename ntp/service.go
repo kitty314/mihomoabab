@@ -9,8 +9,8 @@ import (
 	"github.com/metacubex/clash/component/proxydialer"
 	"github.com/metacubex/clash/log"
 
-	M "github.com/sagernet/sing/common/metadata"
-	"github.com/sagernet/sing/common/ntp"
+	M "github.com/metacubex/sing/common/metadata"
+	"github.com/metacubex/sing/common/ntp"
 )
 
 var offset time.Duration

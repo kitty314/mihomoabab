@@ -12,16 +12,16 @@ import (
 	"github.com/metacubex/clash/adapter/inbound"
 	"github.com/metacubex/clash/common/atomic"
 	"github.com/metacubex/clash/common/buf"
-	N "github.com/metacubex/clash/common/net"
+	"github.com/metacubex/clash/component/ca"
 	C "github.com/metacubex/clash/constant"
 	LC "github.com/metacubex/clash/listener/config"
 	"github.com/metacubex/clash/listener/sing"
 	"github.com/metacubex/clash/transport/anytls/padding"
 	"github.com/metacubex/clash/transport/anytls/session"
 
-	"github.com/sagernet/sing/common/auth"
-	"github.com/sagernet/sing/common/bufio"
-	M "github.com/sagernet/sing/common/metadata"
+	"github.com/metacubex/sing/common/auth"
+	"github.com/metacubex/sing/common/bufio"
+	M "github.com/metacubex/sing/common/metadata"
 )
 
 type Listener struct {
@@ -43,7 +43,7 @@ func New(config LC.AnyTLSServer, tunnel C.Tunnel, additions ...inbound.Addition)
 
 	tlsConfig := &tls.Config{}
 	if config.Certificate != "" && config.PrivateKey != "" {
-		cert, err := N.ParseCert(config.Certificate, config.PrivateKey, C.Path)
+		cert, err := ca.LoadTLSKeyPair(config.Certificate, config.PrivateKey, C.Path)
 		if err != nil {
 			return nil, err
 		}

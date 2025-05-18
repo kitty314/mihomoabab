@@ -17,7 +17,6 @@ import (
 
 var (
 	errVehicleType = errors.New("unsupport vehicle type")
-	errSubPath     = errors.New("path is not subpath of home directory")
 )
 
 type healthCheckSchema struct {
@@ -115,7 +114,7 @@ func ParseProxyProvider(name string, mapping map[string]any) (types.ProxyProvide
 		if schema.Path != "" {
 			path = C.Path.Resolve(schema.Path)
 			if !C.Path.IsSafePath(path) {
-				return nil, fmt.Errorf("%w: %s", errSubPath, path)
+				return nil, C.Path.ErrNotSafePath(path)
 			}
 		}
 		vehicle = resource.NewHTTPVehicle(schema.URL, path, schema.Proxy, schema.Header, resource.DefaultHttpTimeout, schema.SizeLimit)
@@ -127,5 +126,5 @@ func ParseProxyProvider(name string, mapping map[string]any) (types.ProxyProvide
 
 	interval := time.Duration(uint(schema.Interval)) * time.Second
 
-	return NewProxySetProvider(name, interval, parser, vehicle, hc)
+	return NewProxySetProvider(name, interval, schema.Payload, parser, vehicle, hc)
 }

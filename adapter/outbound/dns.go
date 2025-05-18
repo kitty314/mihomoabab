@@ -7,7 +7,6 @@ import (
 
 	N "github.com/metacubex/clash/common/net"
 	"github.com/metacubex/clash/common/pool"
-	"github.com/metacubex/clash/component/dialer"
 	"github.com/metacubex/clash/component/resolver"
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/log"
@@ -23,14 +22,14 @@ type DnsOption struct {
 }
 
 // DialContext implements C.ProxyAdapter
-func (d *Dns) DialContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.Conn, error) {
+func (d *Dns) DialContext(ctx context.Context, metadata *C.Metadata) (C.Conn, error) {
 	left, right := N.Pipe()
 	go resolver.RelayDnsConn(context.Background(), right, 0)
 	return NewConn(left, d), nil
 }
 
 // ListenPacketContext implements C.ProxyAdapter
-func (d *Dns) ListenPacketContext(ctx context.Context, metadata *C.Metadata, opts ...dialer.Option) (C.PacketConn, error) {
+func (d *Dns) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (C.PacketConn, error) {
 	log.Debugln("[DNS] hijack udp:%s from %s", metadata.RemoteAddress(), metadata.SourceAddrPort())
 
 	ctx, cancel := context.WithCancel(context.Background())

@@ -448,6 +448,27 @@ proxies: # socks5
       host: "cloud.tencent.com"
       password: "shadow_tls_password"
       version: 2 # support 1/2/3
+      # alpn: ["h2","http/1.1"]
+
+  - name: "ss5"
+    type: ss
+    server: server
+    port: 443
+    cipher: chacha20-ietf-poly1305
+    password: "password"
+    plugin: gost-plugin
+    plugin-opts:
+      mode: websocket
+      # tls: true # wss
+      # 可使用 openssl x509 -noout -fingerprint -sha256 -inform pem -in yourcert.pem 获取
+      # 配置指纹将实现 SSL Pining 效果
+      # fingerprint: xxxx
+      # skip-cert-verify: true
+      # host: bing.com
+      # path: "/"
+      # mux: true
+      # headers:
+      #   custom: value
 
   - name: "ss5"
     type: ss
@@ -905,6 +926,12 @@ proxies: # socks5
 # dns 出站会将请求劫持到内部 dns 模块，所有请求均在内部处理
   - name: "dns-out"
     type: dns
+
+  # 配置指定 interface-name 和 fwmark 的 DIRECT
+  - name: en1-direct
+    type: direct
+    interface-name: en1
+    routing-mark: 6667
 proxy-groups:
   # 代理链，目前 relay 可以支持 udp 的只有 vmess/vless/trojan/ss/ssr/tuic
   # wireguard 目前不支持在 relay 中使用，请使用 proxy 中的 dialer-proxy 配置项
@@ -960,14 +987,6 @@ proxy-groups:
       - ss2
       - vmess1
       - auto
-
-  # 配置指定 interface-name 和 fwmark 的 DIRECT
-  - name: en1
-    type: select
-    interface-name: en1
-    routing-mark: 6667
-    proxies:
-      - DIRECT
 
   - name: UseProvider
     type: select
@@ -1179,6 +1198,15 @@ listeners:
     # proxy: proxy # 如果不为空则直接将该入站流量交由指定 proxy 处理 (当 proxy 不为空时，这里的 proxy 名称必须合法，否则会出错)
     password: vlmpIPSyHH6f4S8WVPdRIHIlzmB+GIRfoH3aNJ/t9Gg=
     cipher: 2022-blake3-aes-256-gcm
+    # shadow-tls:
+    #   enable: false # 设置为true时开启
+    #   version: 3 # 支持v1/v2/v3
+    #   password: password # v2设置项
+    #   users: # v3设置项
+    #     - name: 1
+    #       password: password
+    #   handshake:
+    #     dest: test.com:443
 
   - name: vmess-in-1
     type: vmess

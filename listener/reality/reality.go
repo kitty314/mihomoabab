@@ -9,6 +9,7 @@ import (
 	"net"
 	"time"
 
+	N "github.com/metacubex/clash/common/net"
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/listener/inner"
 	"github.com/metacubex/clash/log"
@@ -79,11 +80,17 @@ type Builder struct {
 }
 
 func (b Builder) NewListener(l net.Listener) net.Listener {
-	l = utls.NewRealityListener(l, b.realityConfig)
-	// Due to low implementation quality, the reality server intercepted half close and caused memory leaks.
-	// We fixed it by calling Close() directly.
-	l = realityListenerWrapper{l}
-	return l
+	return N.NewHandleContextListener(context.Background(), l, func(ctx context.Context, conn net.Conn) (net.Conn, error) {
+		c, err := utls.RealityServer(ctx, conn, b.realityConfig)
+		if err != nil {
+			return nil, err
+		}
+		// Due to low implementation quality, the reality server intercepted half-close and caused memory leaks.
+		// We fixed it by calling Close() directly.
+		return realityConnWrapper{c}, nil
+	}, func(a any) {
+		log.Errorln("reality server panic: %s", a)
+	})
 }
 
 type realityConnWrapper struct {
@@ -96,16 +103,4 @@ func (c realityConnWrapper) Upstream() any {
 
 func (c realityConnWrapper) CloseWrite() error {
 	return c.Close()
-}
-
-type realityListenerWrapper struct {
-	net.Listener
-}
-
-func (l realityListenerWrapper) Accept() (net.Conn, error) {
-	c, err := l.Listener.Accept()
-	if err != nil {
-		return nil, err
-	}
-	return realityConnWrapper{c.(*utls.Conn)}, nil
 }

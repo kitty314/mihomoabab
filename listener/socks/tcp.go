@@ -9,6 +9,7 @@ import (
 	"github.com/metacubex/clash/adapter/inbound"
 	N "github.com/metacubex/clash/common/net"
 	"github.com/metacubex/clash/component/auth"
+	"github.com/metacubex/clash/component/ca"
 	C "github.com/metacubex/clash/constant"
 	authStore "github.com/metacubex/clash/listener/auth"
 	LC "github.com/metacubex/clash/listener/config"
@@ -62,7 +63,7 @@ func NewWithConfig(config LC.AuthServer, tunnel C.Tunnel, additions ...inbound.A
 	var realityBuilder *reality.Builder
 
 	if config.Certificate != "" && config.PrivateKey != "" {
-		cert, err := N.ParseCert(config.Certificate, config.PrivateKey, C.Path)
+		cert, err := ca.LoadTLSKeyPair(config.Certificate, config.PrivateKey, C.Path)
 		if err != nil {
 			return nil, err
 		}

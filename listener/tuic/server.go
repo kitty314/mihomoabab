@@ -7,8 +7,9 @@ import (
 	"time"
 
 	"github.com/metacubex/clash/adapter/inbound"
-	CN "github.com/metacubex/clash/common/net"
 	"github.com/metacubex/clash/common/sockopt"
+	"github.com/metacubex/clash/component/ca"
+	tlsC "github.com/metacubex/clash/component/tls"
 	C "github.com/metacubex/clash/constant"
 	LC "github.com/metacubex/clash/listener/config"
 	"github.com/metacubex/clash/listener/sing"
@@ -47,7 +48,7 @@ func New(config LC.TuicServer, tunnel C.Tunnel, additions ...inbound.Addition) (
 		return nil, err
 	}
 
-	cert, err := CN.ParseCert(config.Certificate, config.PrivateKey, C.Path)
+	cert, err := ca.LoadTLSKeyPair(config.Certificate, config.PrivateKey, C.Path)
 	if err != nil {
 		return nil, err
 	}
@@ -74,6 +75,7 @@ func New(config LC.TuicServer, tunnel C.Tunnel, additions ...inbound.Addition) (
 		MaxIncomingUniStreams: ServerMaxIncomingStreams,
 		EnableDatagrams:       true,
 		Allow0RTT:             true,
+		DisablePathManager:    true, // for port hopping
 	}
 	quicConfig.InitialStreamReceiveWindow = tuic.DefaultStreamReceiveWindow / 10
 	quicConfig.MaxStreamReceiveWindow = tuic.DefaultStreamReceiveWindow
@@ -123,7 +125,7 @@ func New(config LC.TuicServer, tunnel C.Tunnel, additions ...inbound.Addition) (
 	option := &tuic.ServerOption{
 		HandleTcpFn:           handleTcpFn,
 		HandleUdpFn:           handleUdpFn,
-		TlsConfig:             tlsConfig,
+		TlsConfig:             tlsC.UConfig(tlsConfig),
 		QuicConfig:            quicConfig,
 		CongestionController:  config.CongestionController,
 		AuthenticationTimeout: time.Duration(config.AuthenticationTimeout) * time.Millisecond,

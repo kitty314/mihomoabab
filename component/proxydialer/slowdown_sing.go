@@ -5,7 +5,7 @@ import (
 	"net"
 
 	"github.com/metacubex/clash/component/slowdown"
-	M "github.com/sagernet/sing/common/metadata"
+	M "github.com/metacubex/sing/common/metadata"
 )
 
 type SlowDownSingDialer struct {

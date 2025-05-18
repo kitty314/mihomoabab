@@ -15,8 +15,8 @@ import (
 	"time"
 
 	"github.com/metacubex/clash/adapter/inbound"
-	CN "github.com/metacubex/clash/common/net"
 	"github.com/metacubex/clash/common/utils"
+	"github.com/metacubex/clash/component/ca"
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/log"
 	"github.com/metacubex/clash/tunnel/statistic"
@@ -186,7 +186,7 @@ func startTLS(cfg *Config) {
 
 	// handle tlsAddr
 	if len(cfg.TLSAddr) > 0 {
-		c, err := CN.ParseCert(cfg.Certificate, cfg.PrivateKey, C.Path)
+		c, err := ca.LoadTLSKeyPair(cfg.Certificate, cfg.PrivateKey, C.Path)
 		if err != nil {
 			log.Errorln("External controller tls listen error: %s", err)
 			return

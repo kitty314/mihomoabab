@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/metacubex/clash/adapter/inbound"
-	N "github.com/metacubex/clash/common/net"
+	"github.com/metacubex/clash/component/ca"
 	C "github.com/metacubex/clash/constant"
 	LC "github.com/metacubex/clash/listener/config"
 	"github.com/metacubex/clash/listener/reality"
@@ -20,7 +20,7 @@ import (
 	"github.com/metacubex/clash/transport/trojan"
 	clashVMess "github.com/metacubex/clash/transport/vmess"
 
-	"github.com/sagernet/smux"
+	"github.com/metacubex/smux"
 )
 
 type Listener struct {
@@ -74,7 +74,7 @@ func New(config LC.TrojanServer, tunnel C.Tunnel, additions ...inbound.Addition)
 	var httpHandler http.Handler
 
 	if config.Certificate != "" && config.PrivateKey != "" {
-		cert, err := N.ParseCert(config.Certificate, config.PrivateKey, C.Path)
+		cert, err := ca.LoadTLSKeyPair(config.Certificate, config.PrivateKey, C.Path)
 		if err != nil {
 			return nil, err
 		}

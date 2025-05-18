@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/metacubex/clash/common/picker"
-	"github.com/metacubex/clash/component/dialer"
 	"github.com/metacubex/clash/component/resolver"
 	"github.com/metacubex/clash/log"
 
@@ -115,11 +114,6 @@ func transform(servers []NameServer, resolver *Resolver) []dnsClient {
 			continue
 		}
 
-		var options []dialer.Option
-		if s.Interface != "" {
-			options = append(options, dialer.WithInterface(s.Interface))
-		}
-
 		host, port, _ := net.SplitHostPort(s.Addr)
 		ret = append(ret, &client{
 			Client: &D.Client{
@@ -132,7 +126,7 @@ func transform(servers []NameServer, resolver *Resolver) []dnsClient {
 			},
 			port:   port,
 			host:   host,
-			dialer: newDNSDialer(resolver, s.ProxyAdapter, s.ProxyName, options...),
+			dialer: newDNSDialer(resolver, s.ProxyAdapter, s.ProxyName),
 		})
 	}
 	return ret

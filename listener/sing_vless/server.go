@@ -11,7 +11,7 @@ import (
 	"unsafe"
 
 	"github.com/metacubex/clash/adapter/inbound"
-	N "github.com/metacubex/clash/common/net"
+	"github.com/metacubex/clash/component/ca"
 	tlsC "github.com/metacubex/clash/component/tls"
 	C "github.com/metacubex/clash/constant"
 	LC "github.com/metacubex/clash/listener/config"
@@ -22,8 +22,8 @@ import (
 	clashVMess "github.com/metacubex/clash/transport/vmess"
 
 	"github.com/metacubex/sing-vmess/vless"
-	"github.com/sagernet/sing/common"
-	"github.com/sagernet/sing/common/metadata"
+	"github.com/metacubex/sing/common"
+	"github.com/metacubex/sing/common/metadata"
 )
 
 func init() {
@@ -87,7 +87,7 @@ func New(config LC.VlessServer, tunnel C.Tunnel, additions ...inbound.Addition) 
 	var httpHandler http.Handler
 
 	if config.Certificate != "" && config.PrivateKey != "" {
-		cert, err := N.ParseCert(config.Certificate, config.PrivateKey, C.Path)
+		cert, err := ca.LoadTLSKeyPair(config.Certificate, config.PrivateKey, C.Path)
 		if err != nil {
 			return nil, err
 		}

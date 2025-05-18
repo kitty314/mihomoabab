@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/metacubex/clash/adapter/inbound"
-	N "github.com/metacubex/clash/common/net"
+	"github.com/metacubex/clash/component/ca"
 	C "github.com/metacubex/clash/constant"
 	LC "github.com/metacubex/clash/listener/config"
 	"github.com/metacubex/clash/listener/reality"
@@ -20,8 +20,8 @@ import (
 	clashVMess "github.com/metacubex/clash/transport/vmess"
 
 	vmess "github.com/metacubex/sing-vmess"
-	"github.com/sagernet/sing/common"
-	"github.com/sagernet/sing/common/metadata"
+	"github.com/metacubex/sing/common"
+	"github.com/metacubex/sing/common/metadata"
 )
 
 type Listener struct {
@@ -80,7 +80,7 @@ func New(config LC.VmessServer, tunnel C.Tunnel, additions ...inbound.Addition) 
 	var httpHandler http.Handler
 
 	if config.Certificate != "" && config.PrivateKey != "" {
-		cert, err := N.ParseCert(config.Certificate, config.PrivateKey, C.Path)
+		cert, err := ca.LoadTLSKeyPair(config.Certificate, config.PrivateKey, C.Path)
 		if err != nil {
 			return nil, err
 		}

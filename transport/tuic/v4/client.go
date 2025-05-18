@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"crypto/tls"
 	"errors"
 	"net"
 	"runtime"
@@ -15,6 +14,7 @@ import (
 	atomic2 "github.com/metacubex/clash/common/atomic"
 	N "github.com/metacubex/clash/common/net"
 	"github.com/metacubex/clash/common/pool"
+	tlsC "github.com/metacubex/clash/component/tls"
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/log"
 	"github.com/metacubex/clash/transport/tuic/common"
@@ -25,7 +25,7 @@ import (
 )
 
 type ClientOption struct {
-	TlsConfig             *tls.Config
+	TlsConfig             *tlsC.Config
 	QuicConfig            *quic.Config
 	Token                 [32]byte
 	UdpRelayMode          common.UdpRelayMode

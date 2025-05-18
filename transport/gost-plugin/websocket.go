@@ -8,7 +8,7 @@ import (
 
 	"github.com/metacubex/clash/component/ca"
 	"github.com/metacubex/clash/transport/vmess"
-	smux "github.com/sagernet/smux"
+	smux "github.com/metacubex/smux"
 )
 
 // Option is options of gost websocket
