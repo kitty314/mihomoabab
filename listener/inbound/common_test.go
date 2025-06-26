@@ -18,12 +18,15 @@ import (
 	"github.com/metacubex/clash/common/utils"
 	"github.com/metacubex/clash/component/ca"
 	"github.com/metacubex/clash/component/dialer"
+	"github.com/metacubex/clash/component/ech"
 	"github.com/metacubex/clash/component/generater"
+	tlsC "github.com/metacubex/clash/component/tls"
 	C "github.com/metacubex/clash/constant"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/net/http2"
 )
 
 var httpPath = "/inbound_test"
@@ -38,6 +41,8 @@ var realityPrivateKey, realityPublickey string
 var realityDest = "itunes.apple.com"
 var realityShortid = "10f897e26c4b9478"
 var realityRealDial = false
+var echPublicSni = "public.sni"
+var echConfigBase64, echKeyPem, _ = ech.GenECHConfig(echPublicSni)
 
 func init() {
 	rand.Read(httpData)
@@ -131,7 +136,10 @@ func NewHttpTestTunnel() *TestTunnel {
 	r.Get(httpPath, func(w http.ResponseWriter, r *http.Request) {
 		render.Data(w, r, httpData)
 	})
-	go http.Serve(ln, r)
+	h2Server := &http2.Server{}
+	server := http.Server{Handler: r}
+	_ = http2.ConfigureServer(&server, h2Server)
+	go server.Serve(ln)
 	testFn := func(t *testing.T, proxy C.ProxyAdapter, proto string) {
 		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s://%s%s", proto, remoteAddr, httpPath), nil)
 		if !assert.NoError(t, err) {
@@ -205,23 +213,27 @@ func NewHttpTestTunnel() *TestTunnel {
 				ch:   make(chan struct{}),
 			}
 			if metadata.DstPort == 443 {
-				tlsConn := tls.Server(c, tlsConfig.Clone())
+				tlsConn := tlsC.Server(c, tlsC.UConfig(tlsConfig))
 				if metadata.Host == realityDest { // ignore the tls handshake error for realityDest
 					if realityRealDial {
 						rconn, err := dialer.DialContext(ctx, "tcp", metadata.RemoteAddress())
 						if err != nil {
 							panic(err)
 						}
-						N.Relay(rconn, tlsConn)
-						return
-					}
-					ctx, cancel := context.WithTimeout(ctx, C.DefaultTLSTimeout)
-					defer cancel()
-					if err := tlsConn.HandshakeContext(ctx); err != nil {
+						N.Relay(rconn, conn)
 						return
 					}
 				}
-				ln.ch <- tlsConn
+				ctx, cancel := context.WithTimeout(ctx, C.DefaultTLSTimeout)
+				defer cancel()
+				if err := tlsConn.HandshakeContext(ctx); err != nil {
+					return
+				}
+				if tlsConn.ConnectionState().NegotiatedProtocol == http2.NextProtoTLS {
+					h2Server.ServeConn(tlsConn, &http2.ServeConnOpts{BaseConfig: &server})
+				} else {
+					ln.ch <- tlsConn
+				}
 			} else {
 				ln.ch <- c
 			}

@@ -1,12 +1,13 @@
 package http
 
 import (
-	"crypto/tls"
 	"errors"
 	"net"
 
 	"github.com/metacubex/clash/adapter/inbound"
 	"github.com/metacubex/clash/component/ca"
+	"github.com/metacubex/clash/component/ech"
+	tlsC "github.com/metacubex/clash/component/tls"
 	C "github.com/metacubex/clash/constant"
 	authStore "github.com/metacubex/clash/listener/auth"
 	LC "github.com/metacubex/clash/listener/config"
@@ -64,7 +65,7 @@ func NewWithConfig(config LC.AuthServer, tunnel C.Tunnel, additions ...inbound.A
 		return nil, err
 	}
 
-	tlsConfig := &tls.Config{}
+	tlsConfig := &tlsC.Config{}
 	var realityBuilder *reality.Builder
 
 	if config.Certificate != "" && config.PrivateKey != "" {
@@ -72,7 +73,14 @@ func NewWithConfig(config LC.AuthServer, tunnel C.Tunnel, additions ...inbound.A
 		if err != nil {
 			return nil, err
 		}
-		tlsConfig.Certificates = []tls.Certificate{cert}
+		tlsConfig.Certificates = []tlsC.Certificate{tlsC.UCertificate(cert)}
+
+		if config.EchKey != "" {
+			err = ech.LoadECHKey(config.EchKey, tlsConfig, C.Path)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 	if config.RealityConfig.PrivateKey != "" {
 		if tlsConfig.Certificates != nil {
@@ -87,7 +95,7 @@ func NewWithConfig(config LC.AuthServer, tunnel C.Tunnel, additions ...inbound.A
 	if realityBuilder != nil {
 		l = realityBuilder.NewListener(l)
 	} else if len(tlsConfig.Certificates) > 0 {
-		l = tls.NewListener(l, tlsConfig)
+		l = tlsC.NewListener(l, tlsConfig)
 	}
 
 	hl := &Listener{

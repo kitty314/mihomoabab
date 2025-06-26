@@ -12,6 +12,7 @@ import (
 	N "github.com/metacubex/clash/common/net"
 	"github.com/metacubex/clash/component/ca"
 	"github.com/metacubex/clash/component/dialer"
+	"github.com/metacubex/clash/component/ech"
 	"github.com/metacubex/clash/component/proxydialer"
 	tlsC "github.com/metacubex/clash/component/tls"
 	C "github.com/metacubex/clash/constant"
@@ -32,6 +33,7 @@ type Trojan struct {
 	transport    *gun.TransportWrap
 
 	realityConfig *tlsC.RealityConfig
+	echConfig     *ech.Config
 
 	ssCipher core.Cipher
 }
@@ -48,6 +50,7 @@ type TrojanOption struct {
 	Fingerprint       string         `proxy:"fingerprint,omitempty"`
 	UDP               bool           `proxy:"udp,omitempty"`
 	Network           string         `proxy:"network,omitempty"`
+	ECHOpts           ECHOptions     `proxy:"ech-opts,omitempty"`
 	RealityOpts       RealityOptions `proxy:"reality-opts,omitempty"`
 	GrpcOpts          GrpcOptions    `proxy:"grpc-opts,omitempty"`
 	WSOpts            WSOptions      `proxy:"ws-opts,omitempty"`
@@ -77,6 +80,7 @@ func (t *Trojan) StreamConnContext(ctx context.Context, c net.Conn, metadata *C.
 			V2rayHttpUpgrade:         t.option.WSOpts.V2rayHttpUpgrade,
 			V2rayHttpUpgradeFastOpen: t.option.WSOpts.V2rayHttpUpgradeFastOpen,
 			ClientFingerprint:        t.option.ClientFingerprint,
+			ECHConfig:                t.echConfig,
 			Headers:                  http.Header{},
 		}
 
@@ -110,7 +114,7 @@ func (t *Trojan) StreamConnContext(ctx context.Context, c net.Conn, metadata *C.
 
 		c, err = vmess.StreamWebsocketConn(ctx, c, wsOpts)
 	case "grpc":
-		c, err = gun.StreamGunWithConn(c, t.gunTLSConfig, t.gunConfig, t.realityConfig)
+		c, err = gun.StreamGunWithConn(c, t.gunTLSConfig, t.gunConfig, t.echConfig, t.realityConfig)
 	default:
 		// default tcp network
 		// handle TLS
@@ -124,6 +128,7 @@ func (t *Trojan) StreamConnContext(ctx context.Context, c net.Conn, metadata *C.
 			FingerPrint:       t.option.Fingerprint,
 			ClientFingerprint: t.option.ClientFingerprint,
 			NextProtos:        alpn,
+			ECH:               t.echConfig,
 			Reality:           t.realityConfig,
 		})
 	}
@@ -214,6 +219,10 @@ func (t *Trojan) DialContextWithDialer(ctx context.Context, dialer C.Dialer, met
 
 // ListenPacketContext implements C.ProxyAdapter
 func (t *Trojan) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (_ C.PacketConn, err error) {
+	if err = t.ResolveUDP(ctx, metadata); err != nil {
+		return nil, err
+	}
+
 	var c net.Conn
 
 	// grpc transport
@@ -245,6 +254,9 @@ func (t *Trojan) ListenPacketWithDialer(ctx context.Context, dialer C.Dialer, me
 			return nil, err
 		}
 	}
+	if err = t.ResolveUDP(ctx, metadata); err != nil {
+		return nil, err
+	}
 	c, err := dialer.DialContext(ctx, "tcp", t.addr)
 	if err != nil {
 		return nil, fmt.Errorf("%s connect error: %w", t.addr, err)
@@ -264,12 +276,6 @@ func (t *Trojan) ListenPacketWithDialer(ctx context.Context, dialer C.Dialer, me
 // SupportWithDialer implements C.ProxyAdapter
 func (t *Trojan) SupportWithDialer() C.NetWork {
 	return C.ALLNet
-}
-
-// ListenPacketOnStreamConn implements C.ProxyAdapter
-func (t *Trojan) ListenPacketOnStreamConn(c net.Conn, metadata *C.Metadata) (_ C.PacketConn, err error) {
-	pc := trojan.NewPacketConn(c)
-	return newPacketConn(pc, t), err
 }
 
 // SupportUOT implements C.ProxyAdapter
@@ -321,6 +327,11 @@ func NewTrojan(option TrojanOption) (*Trojan, error) {
 		return nil, err
 	}
 
+	t.echConfig, err = option.ECHOpts.Parse()
+	if err != nil {
+		return nil, err
+	}
+
 	if option.SSOpts.Enabled {
 		if option.SSOpts.Password == "" {
 			return nil, errors.New("empty password")
@@ -365,7 +376,7 @@ func NewTrojan(option TrojanOption) (*Trojan, error) {
 			return nil, err
 		}
 
-		t.transport = gun.NewHTTP2Client(dialFn, tlsConfig, option.ClientFingerprint, t.realityConfig)
+		t.transport = gun.NewHTTP2Client(dialFn, tlsConfig, option.ClientFingerprint, t.echConfig, t.realityConfig)
 
 		t.gunTLSConfig = tlsConfig
 		t.gunConfig = &gun.Config{
