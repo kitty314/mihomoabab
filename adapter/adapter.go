@@ -14,10 +14,10 @@ import (
 	"github.com/metacubex/clash/common/atomic"
 	"github.com/metacubex/clash/common/queue"
 	"github.com/metacubex/clash/common/utils"
+	"github.com/metacubex/clash/common/xsync"
 	"github.com/metacubex/clash/component/ca"
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/log"
-	"github.com/puzpuzpuz/xsync/v3"
 )
 
 var UnifiedDelay = atomic.NewBool(false)
@@ -35,7 +35,7 @@ type Proxy struct {
 	C.ProxyAdapter
 	alive   atomic.Bool
 	history *queue.Queue[C.DelayHistory]
-	extra   *xsync.MapOf[string, *internalProxyState]
+	extra   xsync.Map[string, *internalProxyState]
 }
 
 // Adapter implements C.Proxy
@@ -293,7 +293,7 @@ func NewProxy(adapter C.ProxyAdapter) *Proxy {
 		ProxyAdapter: adapter,
 		history:      queue.New[C.DelayHistory](defaultHistoriesNum),
 		alive:        atomic.NewBool(true),
-		extra:        xsync.NewMapOf[string, *internalProxyState]()}
+	}
 }
 
 func urlToMetadata(rawURL string) (addr C.Metadata, err error) {
