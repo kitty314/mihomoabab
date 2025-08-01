@@ -1,22 +1,22 @@
-# name: Build_2
-# on:
-#   workflow_dispatch:
-#     inputs:
-#       version:
-#         description: "Tag version to release"
-#         required: true
-#   push:
-#     paths-ignore:
-#       - "docs/**"
-#       - "README.md"
-#       - ".github/ISSUE_TEMPLATE/**"
-#     branches:
-#       - Alpha
-#     tags:
-#       - "kitten*"
-#   pull_request_target:
-#     branches:
-#       - Alpha
+name: Build_2
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Tag version to release"
+        required: true
+  push:
+    paths-ignore:
+      - "docs/**"
+      - "README.md"
+      - ".github/ISSUE_TEMPLATE/**"
+    branches:
+      - Alpha
+    tags:
+      - "kitten*"
+  pull_request_target:
+    branches:
+      - Alpha
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true

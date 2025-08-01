@@ -1,13 +1,13 @@
-# name: Build_1
-# on:
-#   workflow_dispatch:
-#   push:
-#     paths-ignore:
-#       - "docs/**"
-#       - "README.md"
-#       - ".github/ISSUE_TEMPLATE/**"
-#     tags:
-#       - "kitty*"
+name: Build_1
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - "docs/**"
+      - "README.md"
+      - ".github/ISSUE_TEMPLATE/**"
+    tags:
+      - "kitty*"
       
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
