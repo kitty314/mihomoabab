@@ -1,22 +1,22 @@
-# name: Build_2
-# on:
-#   workflow_dispatch:
-#     inputs:
-#       version:
-#         description: "Tag version to release"
-#         required: true
-#   push:
-#     paths-ignore:
-#       - "docs/**"
-#       - "README.md"
-#       - ".github/ISSUE_TEMPLATE/**"
-#     branches:
-#       - Alpha
-#     tags:
-#       - "kitten*"
-#   pull_request_target:
-#     branches:
-#       - Alpha
+name: Build_3
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Tag version to release"
+        required: true
+  push:
+    paths-ignore:
+      - "docs/**"
+      - "README.md"
+      - ".github/ISSUE_TEMPLATE/**"
+    # branches:
+    #   - Alpha
+    tags:
+      - "nekopara*"
+  # pull_request:
+  #   branches:
+  #     - Alpha
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
@@ -29,26 +29,33 @@ jobs:
     strategy:
       matrix:
         jobs:
-          - { goos: windows, goarch: amd64, goamd64: v1, output: amd64-compatible }
-          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64 }
+          - { goos: windows, goarch: amd64, goamd64: v1, output: amd64-v1 }
+          - { goos: windows, goarch: amd64, goamd64: v2, output: amd64-v2 }
+          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-v3 }
 
-          - { goos: windows, goarch: amd64, goamd64: v1, output: amd64-compatible-go123, goversion: '1.23' }
-          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-go123, goversion: '1.23' }
+          # Go 1.23 with special patch can work on Windows 7
+          # https://github.com/MetaCubeX/go/commits/release-branch.go1.23/
+          - { goos: windows, goarch: amd64, goamd64: v1, output: amd64-v1-go123, goversion: '1.23' }
+          - { goos: windows, goarch: amd64, goamd64: v2, output: amd64-v2-go123, goversion: '1.23' }
+          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-v3-go123, goversion: '1.23' }
+
           # Go 1.22 with special patch can work on Windows 7
           # https://github.com/MetaCubeX/go/commits/release-branch.go1.22/
-          - { goos: windows, goarch: amd64, goamd64: v1, output: amd64-compatible-go122, goversion: '1.22' }
-          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-go122, goversion: '1.22' }
+          - { goos: windows, goarch: amd64, goamd64: v1, output: amd64-v1-go122, goversion: '1.22' }
+          - { goos: windows, goarch: amd64, goamd64: v2, output: amd64-v2-go122, goversion: '1.22' }
+          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-v3-go122, goversion: '1.22' }
 
           # Go 1.21 can revert commit `9e4385` to work on Windows 7
           # https://github.com/golang/go/issues/64622#issuecomment-1847475161
           # (OR we can just use golang1.21.4 which unneeded any patch)
-          - { goos: windows, goarch: amd64, goamd64: v1, output: amd64-compatible-go121, goversion: '1.21' }
-          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-go121, goversion: '1.21' }
+          - { goos: windows, goarch: amd64, goamd64: v1, output: amd64-v1-go121, goversion: '1.21' }
+          - { goos: windows, goarch: amd64, goamd64: v2, output: amd64-v2-go121, goversion: '1.21' }
+          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-v3-go121, goversion: '1.21' }
 
           # Go 1.20 is the last release that will run on any release of Windows 7, 8, Server 2008 and Server 2012. Go 1.21 will require at least Windows 10 or Server 2016.
-          - { goos: windows, goarch: amd64, goamd64: v1, output: amd64-compatible-go120, goversion: '1.20' }
-          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-go120, goversion: '1.20' }
-
+          - { goos: windows, goarch: amd64, goamd64: v1, output: amd64-v1-go120, goversion: '1.20' }
+          - { goos: windows, goarch: amd64, goamd64: v2, output: amd64-v2-go120, goversion: '1.20' }
+          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-v3-go120, goversion: '1.20' }
     steps:
     - uses: actions/checkout@v4
 
@@ -64,6 +71,22 @@ jobs:
       with:
         go-version: ${{ matrix.jobs.goversion }}
 
+    - name: Set up Go1.24 loongarch abi1
+      if: ${{ matrix.jobs.goarch == 'loong64' && matrix.jobs.abi == '1' }}
+      run: |
+        wget -q https://github.com/MetaCubeX/loongarch64-golang/releases/download/1.24.0/go1.24.0.linux-amd64-abi1.tar.gz
+        sudo tar zxf go1.24.0.linux-amd64-abi1.tar.gz -C /usr/local
+        echo "/usr/local/go/bin" >> $GITHUB_PATH
+
+      # modify from https://github.com/restic/restic/issues/4636#issuecomment-1896455557
+      # this patch file only works on golang1.24.x
+      # that means after golang1.25 release it must be changed
+      # see: https://github.com/MetaCubeX/go/commits/release-branch.go1.24/
+      # revert:
+      # 693def151adff1af707d82d28f55dba81ceb08e1: "crypto/rand,runtime: switch RtlGenRandom for ProcessPrng"
+      # 7c1157f9544922e96945196b47b95664b1e39108: "net: remove sysSocket fallback for Windows 7"
+      # 48042aa09c2f878c4faa576948b07fe625c4707a: "syscall: remove Windows 7 console handle workaround"
+      # a17d959debdb04cd550016a3501dd09d50cd62e7: "runtime: always use LoadLibraryEx to load system libraries"
     - name: Revert Golang1.24 commit for Windows7/8
       if: ${{ matrix.jobs.goos == 'windows' && matrix.jobs.goversion == '' }}
       run: |
@@ -117,32 +140,21 @@ jobs:
         curl https://github.com/golang/go/commit/9e43850a3298a9b8b1162ba0033d4c53f8637571.diff | patch --verbose -R -p 1
 
     - name: Set variables
-      if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version != '' }}
-      run: echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
-      shell: bash
-
-    - name: Set variables
-      if: ${{ github.event_name != 'workflow_dispatch' && github.ref_name == 'Alpha' }}
-      run: echo "VERSION=alpha-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-      shell: bash
-      
-    - name: Set variables
-      run: echo "VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-      shell: bash
-
-    - name: Set variables
-      if: ${{github.ref_name=='' || github.ref_type=='tag'}}
-      run: echo "VERSION=$(git describe --tags)" >> $GITHUB_ENV
-      shell: bash
-
-
-    - name: Set Time Variable
       run: |
+        VERSION="${GITHUB_REF_NAME,,}-$(git rev-parse --short HEAD)"
+        VERSION="${VERSION//\//-}"
+        PackageVersion="$(curl -s "https://api.github.com/repos/MetaCubeX/clash/releases/latest" | jq -r '.tag_name' | sed 's/v//g' | awk -F '.' '{$NF = $NF + 1; print}' OFS='.').${VERSION/-/.}"
+        if [ -n "${{ github.event.inputs.version }}" ]; then
+          VERSION=${{ github.event.inputs.version }}
+          PackageVersion="${VERSION#v}"
+        fi
+        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+        echo "PackageVersion=${PackageVersion}" >> $GITHUB_ENV
+      
         echo "BUILDTIME=$(date)" >> $GITHUB_ENV
         echo "CGO_ENABLED=0" >> $GITHUB_ENV
         echo "BUILDTAG=-extldflags --static" >> $GITHUB_ENV
         echo "GOTOOLCHAIN=local" >> $GITHUB_ENV
-
 
     - name: Update CA
       run: |
@@ -155,6 +167,7 @@ jobs:
         GOOS: ${{matrix.jobs.goos}}
         GOARCH: ${{matrix.jobs.goarch}}
         GOAMD64: ${{matrix.jobs.goamd64}}
+        GO386: ${{matrix.jobs.go386}}
         GOARM: ${{matrix.jobs.goarm}}
         GOMIPS: ${{matrix.jobs.gomips}}
       run: |
@@ -169,6 +182,7 @@ jobs:
           rm clash-${{matrix.jobs.goos}}-${{matrix.jobs.output}}
         fi
 
+
     - name: Save version
       run: |
         echo ${VERSION} > version.txt
@@ -182,9 +196,54 @@ jobs:
           clash*.gz
           clash*.deb
           clash*.rpm
+          clash*.pkg.tar.zst
           clash*.zip
           version.txt
+          checksums.txt
 
+
+
+  # Upload-Release:
+  #   permissions: write-all
+  #   if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version != '' }}
+  #   needs: [build]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #       with:
+  #         ref: metstoc
+  #         fetch-depth: '0'
+  #         fetch-tags: 'true'
+
+  #     - name: Get tags
+  #       run: |
+  #         echo "CURRENTVERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+  #         git fetch --tags
+  #         echo "PREVERSION=$(git describe --tags --abbrev=0 HEAD)" >> $GITHUB_ENV
+
+  #     - name: Generate release notes
+  #       run: |
+  #           cp ./.github/genReleaseNote.sh ./
+  #           bash ./genReleaseNote.sh -v ${PREVERSION}...${CURRENTVERSION}
+  #           rm ./genReleaseNote.sh
+  
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         path: bin/
+  #         merge-multiple: true
+  
+  #     - name: Display structure of downloaded files
+  #       run: ls -R
+  #       working-directory: bin
+  
+  #     - name: Upload Release
+  #       uses: softprops/action-gh-release@v2
+  #       if: ${{ success() }}
+  #       with:
+  #         tag_name: ${{ github.event.inputs.version }}
+  #         files: bin/*
+  #         body_path: release.md
 
   Upload-Release:
     permissions: write-all
@@ -195,7 +254,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: Meta
+          ref: metatoc
           fetch-depth: '0'
           fetch-tags: 'true'
 
