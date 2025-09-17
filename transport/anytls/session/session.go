@@ -9,9 +9,9 @@ import (
 	"runtime/debug"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 
-	"github.com/metacubex/clash/common/atomic"
 	"github.com/metacubex/clash/common/buf"
 	"github.com/metacubex/clash/common/pool"
 	"github.com/metacubex/clash/constant"
@@ -38,7 +38,7 @@ type Session struct {
 	// pool
 	seq       uint64
 	idleSince time.Time
-	padding   *atomic.TypedValue[*padding.PaddingFactory]
+	padding   *atomic.Pointer[padding.PaddingFactory]
 
 	peerVersion byte
 
@@ -53,7 +53,7 @@ type Session struct {
 	onNewStream func(stream *Stream)
 }
 
-func NewClientSession(conn net.Conn, _padding *atomic.TypedValue[*padding.PaddingFactory]) *Session {
+func NewClientSession(conn net.Conn, _padding *atomic.Pointer[padding.PaddingFactory]) *Session {
 	s := &Session{
 		conn:        conn,
 		isClient:    true,
@@ -65,7 +65,7 @@ func NewClientSession(conn net.Conn, _padding *atomic.TypedValue[*padding.Paddin
 	return s
 }
 
-func NewServerSession(conn net.Conn, onNewStream func(stream *Stream), _padding *atomic.TypedValue[*padding.PaddingFactory]) *Session {
+func NewServerSession(conn net.Conn, onNewStream func(stream *Stream), _padding *atomic.Pointer[padding.PaddingFactory]) *Session {
 	s := &Session{
 		conn:        conn,
 		onNewStream: onNewStream,

@@ -14,7 +14,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/metacubex/clash/component/generater"
+	"github.com/metacubex/clash/component/generator"
 	"github.com/metacubex/clash/component/geodata"
 	"github.com/metacubex/clash/component/updater"
 	"github.com/metacubex/clash/config"
@@ -73,7 +73,7 @@ func main() {
 	}
 
 	if len(os.Args) > 1 && os.Args[1] == "generate" {
-		generater.Main(os.Args[2:])
+		generator.Main(os.Args[2:])
 		return
 	}
 

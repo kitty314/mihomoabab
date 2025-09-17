@@ -7,9 +7,9 @@ import (
 	"math"
 	"net"
 	"sync"
+	"sync/atomic"
 	"time"
 
-	"github.com/metacubex/clash/common/atomic"
 	"github.com/metacubex/clash/transport/anytls/padding"
 	"github.com/metacubex/clash/transport/anytls/skiplist"
 	"github.com/metacubex/clash/transport/anytls/util"
@@ -29,13 +29,13 @@ type Client struct {
 	sessions     map[uint64]*Session
 	sessionsLock sync.Mutex
 
-	padding *atomic.TypedValue[*padding.PaddingFactory]
+	padding *atomic.Pointer[padding.PaddingFactory]
 
 	idleSessionTimeout time.Duration
 	minIdleSession     int
 }
 
-func NewClient(ctx context.Context, dialOut util.DialOutFunc, _padding *atomic.TypedValue[*padding.PaddingFactory], idleSessionCheckInterval, idleSessionTimeout time.Duration, minIdleSession int) *Client {
+func NewClient(ctx context.Context, dialOut util.DialOutFunc, _padding *atomic.Pointer[padding.PaddingFactory], idleSessionCheckInterval, idleSessionTimeout time.Duration, minIdleSession int) *Client {
 	c := &Client{
 		sessions:           make(map[uint64]*Session),
 		dialOut:            dialOut,

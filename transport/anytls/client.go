@@ -5,9 +5,9 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"net"
+	"sync/atomic"
 	"time"
 
-	"github.com/metacubex/clash/common/atomic"
 	"github.com/metacubex/clash/common/buf"
 	"github.com/metacubex/clash/transport/anytls/padding"
 	"github.com/metacubex/clash/transport/anytls/session"
@@ -33,7 +33,7 @@ type Client struct {
 	dialer         N.Dialer
 	server         M.Socksaddr
 	sessionClient  *session.Client
-	padding        atomic.TypedValue[*padding.PaddingFactory]
+	padding        atomic.Pointer[padding.PaddingFactory]
 }
 
 func NewClient(ctx context.Context, config ClientConfig) *Client {
