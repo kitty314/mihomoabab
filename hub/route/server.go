@@ -20,6 +20,7 @@ import (
 	tlsC "github.com/metacubex/clash/component/tls"
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/log"
+	"github.com/metacubex/clash/ntp"
 	"github.com/metacubex/clash/tunnel/statistic"
 
 	"github.com/go-chi/chi/v5"
@@ -56,17 +57,19 @@ type Memory struct {
 }
 
 type Config struct {
-	Addr        string
-	TLSAddr     string
-	UnixAddr    string
-	PipeAddr    string
-	Secret      string
-	Certificate string
-	PrivateKey  string
-	EchKey      string
-	DohServer   string
-	IsDebug     bool
-	Cors        Cors
+	Addr           string
+	TLSAddr        string
+	UnixAddr       string
+	PipeAddr       string
+	Secret         string
+	Certificate    string
+	PrivateKey     string
+	ClientAuthType string
+	ClientAuthCert string
+	EchKey         string
+	DohServer      string
+	IsDebug        bool
+	Cors           Cors
 }
 
 type Cors struct {
@@ -201,9 +204,23 @@ func startTLS(cfg *Config) {
 		}
 
 		log.Infoln("RESTful API tls listening at: %s", l.Addr().String())
-		tlsConfig := &tlsC.Config{}
+		tlsConfig := &tlsC.Config{Time: ntp.Now}
 		tlsConfig.NextProtos = []string{"h2", "http/1.1"}
 		tlsConfig.Certificates = []tlsC.Certificate{tlsC.UCertificate(cert)}
+		tlsConfig.ClientAuth = tlsC.ClientAuthTypeFromString(cfg.ClientAuthType)
+		if len(cfg.ClientAuthCert) > 0 {
+			if tlsConfig.ClientAuth == tlsC.NoClientCert {
+				tlsConfig.ClientAuth = tlsC.RequireAndVerifyClientCert
+			}
+		}
+		if tlsConfig.ClientAuth == tlsC.VerifyClientCertIfGiven || tlsConfig.ClientAuth == tlsC.RequireAndVerifyClientCert {
+			pool, err := ca.LoadCertificates(cfg.ClientAuthCert, C.Path)
+			if err != nil {
+				log.Errorln("External controller tls listen error: %s", err)
+				return
+			}
+			tlsConfig.ClientCAs = pool
+		}
 
 		if cfg.EchKey != "" {
 			err = ech.LoadECHKey(cfg.EchKey, tlsConfig, C.Path)

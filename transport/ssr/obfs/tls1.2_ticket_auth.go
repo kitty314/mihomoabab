@@ -7,9 +7,9 @@ import (
 	"encoding/binary"
 	"net"
 	"strings"
-	"time"
 
 	"github.com/metacubex/clash/common/pool"
+	"github.com/metacubex/clash/ntp"
 	"github.com/metacubex/clash/transport/ssr/tools"
 
 	"github.com/metacubex/randv2"
@@ -182,7 +182,7 @@ func packData(buf *bytes.Buffer, data []byte) {
 }
 
 func (t *tls12Ticket) packAuthData(buf *bytes.Buffer) {
-	binary.Write(buf, binary.BigEndian, uint32(time.Now().Unix()))
+	binary.Write(buf, binary.BigEndian, uint32(ntp.Now().Unix()))
 	tools.AppendRandBytes(buf, 18)
 	buf.Write(t.hmacSHA1(buf.Bytes()[buf.Len()-22:])[:10])
 }

@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/metacubex/clash/component/ca"
 	clashHttp "github.com/metacubex/clash/component/http"
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/constant/features"
@@ -171,7 +172,7 @@ func (u *CoreUpdater) Update(currentExePath string, channel string, force bool) 
 func (u *CoreUpdater) getLatestVersion(versionURL string) (version string, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
-	resp, err := clashHttp.HttpRequest(ctx, versionURL, http.MethodGet, nil, nil)
+	resp, err := clashHttp.HttpRequest(ctx, versionURL, http.MethodGet, nil, nil, clashHttp.WithCAOption(ca.Option{ZeroTrust: true}))
 	if err != nil {
 		return "", err
 	}
@@ -194,7 +195,7 @@ func (u *CoreUpdater) getLatestVersion(versionURL string) (version string, err e
 func (u *CoreUpdater) download(updateDir, packagePath, packageURL string) (err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*90)
 	defer cancel()
-	resp, err := clashHttp.HttpRequest(ctx, packageURL, http.MethodGet, nil, nil)
+	resp, err := clashHttp.HttpRequest(ctx, packageURL, http.MethodGet, nil, nil, clashHttp.WithCAOption(ca.Option{ZeroTrust: true}))
 	if err != nil {
 		return fmt.Errorf("http request failed: %w", err)
 	}

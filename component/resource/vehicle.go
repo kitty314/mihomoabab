@@ -135,7 +135,7 @@ func (h *HTTPVehicle) Read(ctx context.Context, oldHash utils.HashType) (buf []b
 			setIfNoneMatch = true
 		}
 	}
-	resp, err := clashHttp.HttpRequestWithProxy(ctx, h.url, http.MethodGet, header, nil, h.proxy)
+	resp, err := clashHttp.HttpRequest(ctx, h.url, http.MethodGet, header, nil, clashHttp.WithSpecialProxy(h.proxy))
 	if err != nil {
 		return
 	}
