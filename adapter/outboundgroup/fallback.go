@@ -10,7 +10,7 @@ import (
 	N "github.com/metacubex/clash/common/net"
 	"github.com/metacubex/clash/common/utils"
 	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/constant/provider"
+	P "github.com/metacubex/clash/constant/provider"
 )
 
 type Fallback struct {
@@ -150,7 +150,7 @@ func (f *Fallback) ForceSet(name string) {
 	f.selected = name
 }
 
-func NewFallback(option *GroupCommonOption, providers []provider.ProxyProvider) *Fallback {
+func NewFallback(option *GroupCommonOption, providers []P.ProxyProvider) *Fallback {
 	return &Fallback{
 		GroupBase: NewGroupBase(GroupBaseOption{
 			Name:           option.Name,

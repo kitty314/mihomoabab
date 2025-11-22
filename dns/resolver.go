@@ -9,7 +9,6 @@ import (
 	"github.com/metacubex/clash/common/arc"
 	"github.com/metacubex/clash/common/lru"
 	"github.com/metacubex/clash/common/singleflight"
-	"github.com/metacubex/clash/component/fakeip"
 	"github.com/metacubex/clash/component/resolver"
 	"github.com/metacubex/clash/component/trie"
 	C "github.com/metacubex/clash/constant"
@@ -40,7 +39,6 @@ type result struct {
 type Resolver struct {
 	ipv6                  bool
 	ipv6Timeout           time.Duration
-	hosts                 *trie.DomainTrie[resolver.HostValue]
 	main                  []dnsClient
 	fallback              []dnsClient
 	fallbackDomainFilters []C.DomainMatcher
@@ -452,11 +450,8 @@ type Config struct {
 	DirectFollowPolicy   bool
 	IPv6                 bool
 	IPv6Timeout          uint
-	EnhancedMode         C.DNSMode
 	FallbackIPFilter     []C.IpMatcher
 	FallbackDomainFilter []C.DomainMatcher
-	Pool                 *fakeip.Pool
-	Hosts                *trie.DomainTrie[resolver.HostValue]
 	Policy               []Policy
 	CacheAlgorithm       string
 	CacheMaxSize         int
@@ -530,7 +525,6 @@ func NewResolver(config Config) (rs Resolvers) {
 		ipv6:        config.IPv6,
 		main:        cacheTransform(config.Main),
 		cache:       config.newCache(),
-		hosts:       config.Hosts,
 		ipv6Timeout: time.Duration(config.IPv6Timeout) * time.Millisecond,
 	}
 	r.defaultResolver = defaultResolver
@@ -541,7 +535,6 @@ func NewResolver(config Config) (rs Resolvers) {
 			ipv6:        config.IPv6,
 			main:        cacheTransform(config.ProxyServer),
 			cache:       config.newCache(),
-			hosts:       config.Hosts,
 			ipv6Timeout: time.Duration(config.IPv6Timeout) * time.Millisecond,
 		}
 	}
@@ -551,7 +544,6 @@ func NewResolver(config Config) (rs Resolvers) {
 			ipv6:        config.IPv6,
 			main:        cacheTransform(config.DirectServer),
 			cache:       config.newCache(),
-			hosts:       config.Hosts,
 			ipv6Timeout: time.Duration(config.IPv6Timeout) * time.Millisecond,
 		}
 	}

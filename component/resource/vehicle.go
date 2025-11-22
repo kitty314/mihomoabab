@@ -12,7 +12,7 @@ import (
 	"github.com/metacubex/clash/common/utils"
 	clashHttp "github.com/metacubex/clash/component/http"
 	"github.com/metacubex/clash/component/profile/cachefile"
-	types "github.com/metacubex/clash/constant/provider"
+	P "github.com/metacubex/clash/constant/provider"
 )
 
 const (
@@ -50,8 +50,8 @@ type FileVehicle struct {
 	path string
 }
 
-func (f *FileVehicle) Type() types.VehicleType {
-	return types.File
+func (f *FileVehicle) Type() P.VehicleType {
+	return P.File
 }
 
 func (f *FileVehicle) Path() string {
@@ -91,15 +91,15 @@ type HTTPVehicle struct {
 	timeout   time.Duration
 	sizeLimit int64
 	inRead    func(response *http.Response)
-	provider  types.ProxyProvider
+	provider  P.ProxyProvider
 }
 
 func (h *HTTPVehicle) Url() string {
 	return h.url
 }
 
-func (h *HTTPVehicle) Type() types.VehicleType {
-	return types.HTTP
+func (h *HTTPVehicle) Type() P.VehicleType {
+	return P.HTTP
 }
 
 func (h *HTTPVehicle) Path() string {

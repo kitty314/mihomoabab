@@ -11,7 +11,7 @@ import (
 	"github.com/metacubex/clash/common/singledo"
 	"github.com/metacubex/clash/common/utils"
 	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/constant/provider"
+	P "github.com/metacubex/clash/constant/provider"
 )
 
 type urlTestOption func(*URLTest)
@@ -202,7 +202,7 @@ func parseURLTestOption(config map[string]any) []urlTestOption {
 	return opts
 }
 
-func NewURLTest(option *GroupCommonOption, providers []provider.ProxyProvider, options ...urlTestOption) *URLTest {
+func NewURLTest(option *GroupCommonOption, providers []P.ProxyProvider, options ...urlTestOption) *URLTest {
 	urlTest := &URLTest{
 		GroupBase: NewGroupBase(GroupBaseOption{
 			Name:           option.Name,

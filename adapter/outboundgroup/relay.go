@@ -8,7 +8,7 @@ import (
 	"github.com/metacubex/clash/component/dialer"
 	"github.com/metacubex/clash/component/proxydialer"
 	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/constant/provider"
+	P "github.com/metacubex/clash/constant/provider"
 	"github.com/metacubex/clash/log"
 )
 
@@ -149,7 +149,7 @@ func (r *Relay) Addr() string {
 	return proxies[len(proxies)-1].Addr()
 }
 
-func NewRelay(option *GroupCommonOption, providers []provider.ProxyProvider) *Relay {
+func NewRelay(option *GroupCommonOption, providers []P.ProxyProvider) *Relay {
 	log.Warnln("The group [%s] with relay type is deprecated, please using dialer-proxy instead", option.Name)
 	return &Relay{
 		GroupBase: NewGroupBase(GroupBaseOption{

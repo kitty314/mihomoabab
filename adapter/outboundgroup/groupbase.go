@@ -12,8 +12,7 @@ import (
 	"github.com/metacubex/clash/common/atomic"
 	"github.com/metacubex/clash/common/utils"
 	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/constant/provider"
-	types "github.com/metacubex/clash/constant/provider"
+	P "github.com/metacubex/clash/constant/provider"
 	"github.com/metacubex/clash/log"
 	"github.com/metacubex/clash/tunnel"
 
@@ -26,7 +25,7 @@ type GroupBase struct {
 	filterRegs        []*regexp2.Regexp
 	excludeFilterRegs []*regexp2.Regexp
 	excludeTypeArray  []string
-	providers         []provider.ProxyProvider
+	providers         []P.ProxyProvider
 	failedTestMux     sync.Mutex
 	failedTimes       int
 	failedTime        time.Time
@@ -48,7 +47,7 @@ type GroupBaseOption struct {
 	ExcludeType    string
 	TestTimeout    int
 	MaxFailedTimes int
-	Providers      []provider.ProxyProvider
+	Providers      []P.ProxyProvider
 }
 
 func NewGroupBase(opt GroupBaseOption) *GroupBase {
@@ -125,7 +124,7 @@ func (gb *GroupBase) GetProxies(touch bool) []C.Proxy {
 		}
 	} else {
 		for _, pd := range gb.providers {
-			if pd.VehicleType() == types.Compatible { // compatible provider unneeded filter
+			if pd.VehicleType() == P.Compatible { // compatible provider unneeded filter
 				proxies = append(proxies, pd.Proxies()...)
 				continue
 			}

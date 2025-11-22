@@ -4,9 +4,9 @@ RUN echo "I'm building for $TARGETPLATFORM"
 
 RUN apk add --no-cache gzip && \
     mkdir /clash-config && \
-    wget -O /clash-config/geoip.metadb https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.metadb && \
-    wget -O /clash-config/geosite.dat https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat && \
-    wget -O /clash-config/geoip.dat https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat
+    wget -O /clash-config/geoip.metadb https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.metadb && \
+    wget -O /clash-config/geosite.dat https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat && \
+    wget -O /clash-config/geoip.dat https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat
 
 COPY docker/file-name.sh /clash/file-name.sh
 WORKDIR /clash
