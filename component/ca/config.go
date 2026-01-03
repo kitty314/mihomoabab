@@ -1,7 +1,6 @@
 package ca
 
 import (
-	"crypto/tls"
 	"crypto/x509"
 	_ "embed"
 	"errors"
@@ -11,8 +10,9 @@ import (
 	"sync"
 
 	"github.com/metacubex/clash/common/once"
-	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/ntp"
+
+	"github.com/metacubex/tls"
 )
 
 var globalCertPool *x509.CertPool
@@ -106,12 +106,13 @@ func GetTLSConfig(opt Option) (tlsConfig *tls.Config, err error) {
 	}
 
 	if len(opt.Certificate) > 0 || len(opt.PrivateKey) > 0 {
-		var cert tls.Certificate
-		cert, err = LoadTLSKeyPair(opt.Certificate, opt.PrivateKey, C.Path)
+		certLoader, err := NewTLSKeyPairLoader(opt.Certificate, opt.PrivateKey)
 		if err != nil {
 			return nil, err
 		}
-		tlsConfig.Certificates = []tls.Certificate{cert}
+		tlsConfig.GetClientCertificate = func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
+			return certLoader()
+		}
 	}
 	return tlsConfig, nil
 }

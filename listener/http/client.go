@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"net"
-	"net/http"
 	"time"
 
 	"github.com/metacubex/clash/adapter/inbound"
 	N "github.com/metacubex/clash/common/net"
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/transport/socks5"
+
+	"github.com/metacubex/http"
 )
 
 func newClient(srcConn net.Conn, tunnel C.Tunnel, additions []inbound.Addition) *http.Client { // additions using slice let caller can change its value (without size) after newClient return

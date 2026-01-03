@@ -2,14 +2,14 @@ package route
 
 import (
 	"context"
-	"net/http"
 
 	C "github.com/metacubex/clash/constant"
 	P "github.com/metacubex/clash/constant/provider"
 	"github.com/metacubex/clash/tunnel"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
+	"github.com/metacubex/chi"
+	"github.com/metacubex/chi/render"
+	"github.com/metacubex/http"
 	"github.com/samber/lo"
 )
 

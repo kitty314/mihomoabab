@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/hmac"
 	"crypto/sha1"
-	"crypto/tls"
 	"encoding/binary"
 	"fmt"
 	"hash"
@@ -13,6 +12,8 @@ import (
 
 	"github.com/metacubex/clash/common/pool"
 	C "github.com/metacubex/clash/constant"
+
+	"github.com/metacubex/tls"
 )
 
 const (

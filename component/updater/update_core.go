@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -20,6 +19,8 @@ import (
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/constant/features"
 	"github.com/metacubex/clash/log"
+
+	"github.com/metacubex/http"
 )
 
 const (

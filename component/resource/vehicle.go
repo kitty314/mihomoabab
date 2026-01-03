@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -13,6 +12,8 @@ import (
 	clashHttp "github.com/metacubex/clash/component/http"
 	"github.com/metacubex/clash/component/profile/cachefile"
 	P "github.com/metacubex/clash/constant/provider"
+
+	"github.com/metacubex/http"
 )
 
 const (

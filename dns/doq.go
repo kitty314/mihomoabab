@@ -2,7 +2,6 @@ package dns
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -13,11 +12,11 @@ import (
 	"time"
 
 	"github.com/metacubex/clash/component/ca"
-	tlsC "github.com/metacubex/clash/component/tls"
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/log"
 
 	"github.com/metacubex/quic-go"
+	"github.com/metacubex/tls"
 	D "github.com/miekg/dns"
 )
 
@@ -348,7 +347,7 @@ func (doq *dnsOverQUIC) openConnection(ctx context.Context) (conn *quic.Conn, er
 	transport := quic.Transport{Conn: udp}
 	transport.SetCreatedConn(true) // auto close conn
 	transport.SetSingleUse(true)   // auto close transport
-	conn, err = transport.Dial(ctx, &udpAddr, tlsC.UConfig(tlsConfig), doq.getQUICConfig())
+	conn, err = transport.Dial(ctx, &udpAddr, tlsConfig, doq.getQUICConfig())
 	if err != nil {
 		return nil, fmt.Errorf("opening quic connection to %s: %w", doq.addr, err)
 	}

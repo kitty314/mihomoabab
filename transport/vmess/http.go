@@ -5,11 +5,11 @@ import (
 	"bytes"
 	"fmt"
 	"net"
-	"net/http"
 	"net/textproto"
 
 	"github.com/metacubex/clash/common/utils"
 
+	"github.com/metacubex/http"
 	"github.com/metacubex/randv2"
 )
 

@@ -2,7 +2,6 @@ package dns
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"net"
 	"strings"
@@ -12,6 +11,7 @@ import (
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/log"
 
+	"github.com/metacubex/tls"
 	D "github.com/miekg/dns"
 )
 

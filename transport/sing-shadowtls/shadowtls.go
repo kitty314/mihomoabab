@@ -2,7 +2,6 @@ package sing_shadowtls
 
 import (
 	"context"
-	"crypto/tls"
 	"net"
 
 	"github.com/metacubex/clash/component/ca"
@@ -10,6 +9,7 @@ import (
 	"github.com/metacubex/clash/log"
 
 	"github.com/metacubex/sing-shadowtls"
+	"github.com/metacubex/tls"
 	"golang.org/x/exp/slices"
 )
 

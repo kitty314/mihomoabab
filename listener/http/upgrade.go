@@ -2,15 +2,16 @@ package http
 
 import (
 	"context"
-	"crypto/tls"
 	"net"
-	"net/http"
 	"strings"
 
 	"github.com/metacubex/clash/adapter/inbound"
 	N "github.com/metacubex/clash/common/net"
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/transport/socks5"
+
+	"github.com/metacubex/http"
+	"github.com/metacubex/tls"
 )
 
 func isUpgradeRequest(req *http.Request) bool {

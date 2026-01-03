@@ -3,11 +3,12 @@ package updater
 import (
 	"context"
 	"io"
-	"net/http"
 	"os"
 	"time"
 
 	clashHttp "github.com/metacubex/clash/component/http"
+
+	"github.com/metacubex/http"
 )
 
 const defaultHttpTimeout = time.Second * 90

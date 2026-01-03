@@ -2,13 +2,14 @@ package obfs
 
 import (
 	"context"
-	"crypto/tls"
 	"net"
-	"net/http"
 
 	"github.com/metacubex/clash/component/ca"
 	"github.com/metacubex/clash/component/ech"
 	"github.com/metacubex/clash/transport/vmess"
+
+	"github.com/metacubex/http"
+	"github.com/metacubex/tls"
 )
 
 // Option is options of websocket obfs

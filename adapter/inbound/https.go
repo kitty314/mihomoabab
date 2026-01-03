@@ -2,9 +2,10 @@ package inbound
 
 import (
 	"net"
-	"net/http"
 
 	C "github.com/metacubex/clash/constant"
+
+	"github.com/metacubex/http"
 )
 
 // NewHTTPS receive CONNECT request and return ConnContext

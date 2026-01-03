@@ -2,14 +2,15 @@ package gost
 
 import (
 	"context"
-	"crypto/tls"
 	"net"
-	"net/http"
 
 	"github.com/metacubex/clash/component/ca"
 	"github.com/metacubex/clash/component/ech"
 	"github.com/metacubex/clash/transport/vmess"
-	smux "github.com/metacubex/smux"
+
+	"github.com/metacubex/http"
+	"github.com/metacubex/smux"
+	"github.com/metacubex/tls"
 )
 
 // Option is options of gost websocket

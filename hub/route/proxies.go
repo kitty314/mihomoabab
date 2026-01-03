@@ -3,7 +3,6 @@ package route
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"strconv"
 	"time"
 
@@ -13,8 +12,9 @@ import (
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/tunnel"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
+	"github.com/metacubex/chi"
+	"github.com/metacubex/chi/render"
+	"github.com/metacubex/http"
 )
 
 var (

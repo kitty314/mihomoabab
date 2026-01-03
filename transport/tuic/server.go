@@ -9,7 +9,6 @@ import (
 	"github.com/metacubex/clash/adapter/inbound"
 	N "github.com/metacubex/clash/common/net"
 	"github.com/metacubex/clash/common/utils"
-	tlsC "github.com/metacubex/clash/component/tls"
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/transport/socks5"
 	"github.com/metacubex/clash/transport/tuic/common"
@@ -18,13 +17,14 @@ import (
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/metacubex/quic-go"
+	"github.com/metacubex/tls"
 )
 
 type ServerOption struct {
 	HandleTcpFn func(conn net.Conn, addr socks5.Addr, additions ...inbound.Addition) error
 	HandleUdpFn func(addr socks5.Addr, packet C.UDPPacket, additions ...inbound.Addition) error
 
-	TlsConfig             *tlsC.Config
+	TlsConfig             *tls.Config
 	QuicConfig            *quic.Config
 	Tokens                [][32]byte          // V4 special
 	Users                 map[[16]byte]string // V5 special

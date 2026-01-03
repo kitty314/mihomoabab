@@ -4,7 +4,6 @@ import (
 	"context"
 	"io"
 	"net"
-	"net/http"
 	URL "net/url"
 	"runtime"
 	"strings"
@@ -13,6 +12,8 @@ import (
 	"github.com/metacubex/clash/component/ca"
 	"github.com/metacubex/clash/component/dialer"
 	"github.com/metacubex/clash/listener/inner"
+
+	"github.com/metacubex/http"
 )
 
 var (

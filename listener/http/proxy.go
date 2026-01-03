@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"net/http"
 	"strings"
 	"sync"
 
@@ -14,6 +13,8 @@ import (
 	"github.com/metacubex/clash/component/auth"
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/log"
+
+	"github.com/metacubex/http"
 )
 
 type bodyWrapper struct {

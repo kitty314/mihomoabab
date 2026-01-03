@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"sync"
 	"time"
@@ -14,6 +13,8 @@ import (
 	"github.com/metacubex/clash/component/mmdb"
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/log"
+
+	"github.com/metacubex/http"
 )
 
 var (

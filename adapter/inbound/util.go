@@ -2,12 +2,13 @@ package inbound
 
 import (
 	"net"
-	"net/http"
 	"net/netip"
 	"strings"
 
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/transport/socks5"
+
+	"github.com/metacubex/http"
 )
 
 func parseSocksAddr(target socks5.Addr) *C.Metadata {
