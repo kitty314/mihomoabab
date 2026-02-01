@@ -1,13 +1,15 @@
 package logic_test
 
 import (
+	"testing"
+
 	// https://github.com/golang/go/wiki/CodeReviewComments#import-dot
 	. "github.com/metacubex/clash/rules/logic"
 
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/rules"
+
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 var ParseRule = rules.ParseRule
@@ -37,6 +39,12 @@ func TestNOT(t *testing.T) {
 		DstPort: 6100,
 	}, C.RuleMatchHelper{})
 	assert.Equal(t, false, m)
+
+	_, err = NewNOT("(DST-PORT,5600-6666)", "DIRECT", ParseRule)
+	assert.NotEqual(t, nil, err)
+
+	_, err = NewNOT("DST-PORT,5600-6666", "DIRECT", ParseRule)
+	assert.NotEqual(t, nil, err)
 
 	_, err = NewNOT("((DST-PORT,5600-6666),(DOMAIN,baidu.com))", "DIRECT", ParseRule)
 	assert.NotEqual(t, nil, err)
