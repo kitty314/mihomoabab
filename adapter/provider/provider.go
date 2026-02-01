@@ -13,6 +13,7 @@ import (
 	"github.com/metacubex/clash/adapter"
 	"github.com/metacubex/clash/common/convert"
 	"github.com/metacubex/clash/common/utils"
+	"github.com/metacubex/clash/common/yaml"
 	"github.com/metacubex/clash/component/profile/cachefile"
 	"github.com/metacubex/clash/component/resource"
 	C "github.com/metacubex/clash/constant"
@@ -21,7 +22,6 @@ import (
 
 	"github.com/dlclark/regexp2"
 	"github.com/metacubex/http"
-	"gopkg.in/yaml.v3"
 )
 
 const (

@@ -10,12 +10,11 @@ import (
 	"time"
 
 	"github.com/metacubex/clash/common/pool"
+	"github.com/metacubex/clash/common/yaml"
 	"github.com/metacubex/clash/component/resource"
 	C "github.com/metacubex/clash/constant"
 	P "github.com/metacubex/clash/constant/provider"
 	"github.com/metacubex/clash/rules/common"
-
-	"gopkg.in/yaml.v3"
 )
 
 var tunnel P.Tunnel
