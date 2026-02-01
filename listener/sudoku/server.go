@@ -6,13 +6,13 @@ import (
 	"net"
 	"strings"
 
-	"github.com/metacubex/mihomo/adapter/inbound"
-	C "github.com/metacubex/mihomo/constant"
-	LC "github.com/metacubex/mihomo/listener/config"
-	"github.com/metacubex/mihomo/listener/sing"
-	"github.com/metacubex/mihomo/log"
-	"github.com/metacubex/mihomo/transport/socks5"
-	"github.com/metacubex/mihomo/transport/sudoku"
+	"github.com/metacubex/clash/adapter/inbound"
+	C "github.com/metacubex/clash/constant"
+	LC "github.com/metacubex/clash/listener/config"
+	"github.com/metacubex/clash/listener/sing"
+	"github.com/metacubex/clash/log"
+	"github.com/metacubex/clash/transport/socks5"
+	"github.com/metacubex/clash/transport/sudoku"
 )
 
 type Listener struct {

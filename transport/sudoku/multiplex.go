@@ -7,7 +7,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/metacubex/mihomo/transport/sudoku/multiplex"
+	"github.com/metacubex/clash/transport/sudoku/multiplex"
 )
 
 const (

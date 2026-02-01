@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/mihomo/transport/sudoku/obfs/httpmask"
+	"github.com/metacubex/clash/transport/sudoku/obfs/httpmask"
 )
 
 var (

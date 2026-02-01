@@ -5,7 +5,7 @@ import (
 	"io"
 	"net"
 
-	"github.com/metacubex/mihomo/common/pool"
+	"github.com/metacubex/clash/common/pool"
 )
 
 type PacketConn struct {

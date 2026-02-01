@@ -16,11 +16,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/mihomo/common/buf"
-	"github.com/metacubex/mihomo/common/pool"
-	"github.com/metacubex/mihomo/component/ech"
-	tlsC "github.com/metacubex/mihomo/component/tls"
-	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/clash/common/buf"
+	"github.com/metacubex/clash/common/pool"
+	"github.com/metacubex/clash/component/ech"
+	tlsC "github.com/metacubex/clash/component/tls"
+	C "github.com/metacubex/clash/constant"
 
 	"github.com/metacubex/http"
 	"github.com/metacubex/http/httptrace"

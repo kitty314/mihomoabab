@@ -7,7 +7,7 @@ import (
 	"net"
 	"net/textproto"
 
-	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/clash/common/utils"
 
 	"github.com/metacubex/http"
 	"github.com/metacubex/randv2"

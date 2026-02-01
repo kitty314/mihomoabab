@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/metacubex/mihomo/transport/sudoku/crypto"
-	"github.com/metacubex/mihomo/transport/sudoku/obfs/httpmask"
-	"github.com/metacubex/mihomo/transport/sudoku/obfs/sudoku"
+	"github.com/metacubex/clash/transport/sudoku/crypto"
+	"github.com/metacubex/clash/transport/sudoku/obfs/httpmask"
+	"github.com/metacubex/clash/transport/sudoku/obfs/sudoku"
 
-	"github.com/metacubex/mihomo/log"
+	"github.com/metacubex/clash/log"
 )
 
 type SessionType int

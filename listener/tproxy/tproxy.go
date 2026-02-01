@@ -4,11 +4,11 @@ import (
 	"context"
 	"net"
 
-	"github.com/metacubex/mihomo/adapter/inbound"
-	"github.com/metacubex/mihomo/component/keepalive"
-	"github.com/metacubex/mihomo/component/mptcp"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/transport/socks5"
+	"github.com/metacubex/clash/adapter/inbound"
+	"github.com/metacubex/clash/component/keepalive"
+	"github.com/metacubex/clash/component/mptcp"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/transport/socks5"
 )
 
 type Listener struct {

@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	N "github.com/metacubex/mihomo/common/net"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/transport/sudoku"
+	N "github.com/metacubex/clash/common/net"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/transport/sudoku"
 )
 
 type Sudoku struct {

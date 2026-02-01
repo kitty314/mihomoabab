@@ -7,8 +7,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/metacubex/mihomo/adapter/outboundgroup"
-	"github.com/metacubex/mihomo/common/structure"
+	"github.com/metacubex/clash/adapter/outboundgroup"
+	"github.com/metacubex/clash/common/structure"
 )
 
 // Check if ProxyGroups form DAG(Directed Acyclic Graph), and sort all ProxyGroups by dependency order.

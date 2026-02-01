@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	sudokuobfs "github.com/metacubex/mihomo/transport/sudoku/obfs/sudoku"
+	sudokuobfs "github.com/metacubex/clash/transport/sudoku/obfs/sudoku"
 )
 
 type discardConn struct{}

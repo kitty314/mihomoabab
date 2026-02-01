@@ -4,9 +4,9 @@ import (
 	"context"
 	"net"
 
-	"github.com/metacubex/mihomo/component/ca"
-	tlsC "github.com/metacubex/mihomo/component/tls"
-	"github.com/metacubex/mihomo/log"
+	"github.com/metacubex/clash/component/ca"
+	tlsC "github.com/metacubex/clash/component/tls"
+	"github.com/metacubex/clash/log"
 
 	"github.com/metacubex/sing-shadowtls"
 	"github.com/metacubex/tls"

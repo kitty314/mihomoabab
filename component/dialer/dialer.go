@@ -12,9 +12,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/metacubex/mihomo/component/keepalive"
-	"github.com/metacubex/mihomo/component/mptcp"
-	"github.com/metacubex/mihomo/component/resolver"
+	"github.com/metacubex/clash/component/keepalive"
+	"github.com/metacubex/clash/component/mptcp"
+	"github.com/metacubex/clash/component/resolver"
 )
 
 const (
