@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	C "github.com/metacubex/mihomo/constant"
-	LC "github.com/metacubex/mihomo/listener/config"
-	"github.com/metacubex/mihomo/listener/sudoku"
-	"github.com/metacubex/mihomo/log"
+	C "github.com/metacubex/clash/constant"
+	LC "github.com/metacubex/clash/listener/config"
+	"github.com/metacubex/clash/listener/sudoku"
+	"github.com/metacubex/clash/log"
 )
 
 type SudokuOption struct {
@@ -26,7 +26,7 @@ type SudokuOption struct {
 	HTTPMaskMode           string   `inbound:"http-mask-mode,omitempty"` // "legacy" (default), "stream", "poll", "auto"
 	PathRoot               string   `inbound:"path-root,omitempty"`      // optional first-level path prefix for HTTP tunnel endpoints
 
-	// mihomo private extension (not the part of standard Sudoku protocol)
+	// clash private extension (not the part of standard Sudoku protocol)
 	MuxOption MuxOption `inbound:"mux-option,omitempty"`
 }
 

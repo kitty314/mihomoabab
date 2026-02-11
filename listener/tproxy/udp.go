@@ -4,10 +4,10 @@ import (
 	"net"
 	"net/netip"
 
-	"github.com/metacubex/mihomo/adapter/inbound"
-	"github.com/metacubex/mihomo/common/pool"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/transport/socks5"
+	"github.com/metacubex/clash/adapter/inbound"
+	"github.com/metacubex/clash/common/pool"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/transport/socks5"
 )
 
 type UDPListener struct {

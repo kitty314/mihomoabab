@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/mihomo/common/buf"
-	N "github.com/metacubex/mihomo/common/net"
-	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/clash/common/buf"
+	N "github.com/metacubex/clash/common/net"
+	C "github.com/metacubex/clash/constant"
 
 	"github.com/metacubex/http"
 	"github.com/metacubex/http/h2c"

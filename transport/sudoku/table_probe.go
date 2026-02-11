@@ -11,8 +11,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/metacubex/mihomo/transport/sudoku/crypto"
-	"github.com/metacubex/mihomo/transport/sudoku/obfs/sudoku"
+	"github.com/metacubex/clash/transport/sudoku/crypto"
+	"github.com/metacubex/clash/transport/sudoku/obfs/sudoku"
 )
 
 func pickClientTable(cfg *ProtocolConfig) (*sudoku.Table, error) {

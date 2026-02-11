@@ -5,10 +5,10 @@ import (
 	"net"
 	"strings"
 
-	"github.com/metacubex/mihomo/adapter/inbound"
-	N "github.com/metacubex/mihomo/common/net"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/transport/socks5"
+	"github.com/metacubex/clash/adapter/inbound"
+	N "github.com/metacubex/clash/common/net"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/transport/socks5"
 
 	"github.com/metacubex/http"
 	"github.com/metacubex/tls"

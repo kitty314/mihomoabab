@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/mihomo/log"
+	"github.com/metacubex/clash/log"
 )
 
 const (

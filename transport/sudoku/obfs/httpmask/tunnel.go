@@ -18,7 +18,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/mihomo/component/ca"
+	"github.com/metacubex/clash/component/ca"
 
 	"github.com/metacubex/http"
 	"github.com/metacubex/http/httputil"
