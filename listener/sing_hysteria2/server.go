@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/metacubex/clash/adapter/inbound"
 	"github.com/metacubex/clash/adapter/outbound"
@@ -15,6 +16,7 @@ import (
 	"github.com/metacubex/clash/component/ech"
 	C "github.com/metacubex/clash/constant"
 	LC "github.com/metacubex/clash/listener/config"
+	"github.com/metacubex/clash/listener/inner"
 	"github.com/metacubex/clash/listener/sing"
 	"github.com/metacubex/clash/log"
 	"github.com/metacubex/clash/ntp"
@@ -122,6 +124,21 @@ func New(config LC.Hysteria2Server, tunnel C.Tunnel, additions ...inbound.Additi
 				},
 				ErrorHandler: func(w http.ResponseWriter, r *http.Request, err error) {
 					w.WriteHeader(http.StatusBadGateway)
+				},
+				Transport: &http.Transport{
+					// fellow hysteria2's code skip verify
+					TLSClientConfig: &tls.Config{
+						InsecureSkipVerify: true,
+					},
+					// from http.DefaultTransport
+					ForceAttemptHTTP2:     true,
+					MaxIdleConns:          100,
+					IdleConnTimeout:       90 * time.Second,
+					TLSHandshakeTimeout:   10 * time.Second,
+					ExpectContinueTimeout: 1 * time.Second,
+					DialContext: func(ctx context.Context, network, address string) (net.Conn, error) {
+						return inner.HandleTcp(tunnel, address, "")
+					},
 				},
 			}
 		default:
