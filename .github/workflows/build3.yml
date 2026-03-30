@@ -66,18 +66,18 @@ jobs:
           # - { goos: windows, goarch: amd64, goamd64: v2, output: amd64-v2-go120, goversion: '1.20' }
           # - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-v3-go120, goversion: '1.20' }
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Set up Go
       if: ${{ matrix.jobs.goversion == '' && matrix.jobs.abi != '1' }}
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
         go-version: '1.25'
         check-latest: true
 
     - name: Set up Go
       if: ${{ matrix.jobs.goversion != '' && matrix.jobs.abi != '1' }}
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
         go-version: ${{ matrix.jobs.goversion }}
         check-latest: true
@@ -206,7 +206,7 @@ jobs:
       shell: bash
 
     - name: Archive production artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: "${{ matrix.jobs.goos }}-${{ matrix.jobs.output }}"
         path: |
@@ -269,7 +269,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: metatoc
           fetch-depth: '0'
