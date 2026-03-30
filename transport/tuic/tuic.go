@@ -1,9 +1,9 @@
 package tuic
 
 import (
-	"github.com/metacubex/mihomo/transport/tuic/common"
-	v4 "github.com/metacubex/mihomo/transport/tuic/v4"
-	v5 "github.com/metacubex/mihomo/transport/tuic/v5"
+	"github.com/metacubex/clash/transport/tuic/common"
+	v4 "github.com/metacubex/clash/transport/tuic/v4"
+	v5 "github.com/metacubex/clash/transport/tuic/v5"
 )
 
 type ClientOptionV4 = v4.ClientOption

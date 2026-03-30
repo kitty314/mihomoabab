@@ -5,11 +5,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/mihomo/component/dialer"
-	"github.com/metacubex/mihomo/component/proxydialer"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/log"
-	mihomoNtp "github.com/metacubex/mihomo/ntp"
+	"github.com/metacubex/clash/component/dialer"
+	"github.com/metacubex/clash/component/proxydialer"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/log"
+	clashNtp "github.com/metacubex/clash/ntp"
 
 	M "github.com/metacubex/sing/common/metadata"
 	"github.com/metacubex/sing/common/ntp"
@@ -79,7 +79,7 @@ func (srv *Service) update() error {
 		} else if offset < time.Duration(0) {
 			log.Infoln("System clock is behind NTP time by %s", -offset)
 		}
-		mihomoNtp.SetOffset(offset)
+		clashNtp.SetOffset(offset)
 		if srv.syncSystemTime {
 			timeNow := response.Time
 			syncErr := setSystemTime(timeNow)
@@ -96,7 +96,7 @@ func (srv *Service) update() error {
 }
 
 func (srv *Service) loopUpdate() {
-	defer mihomoNtp.SetOffset(0)
+	defer clashNtp.SetOffset(0)
 	defer srv.ticker.Stop()
 	for {
 		err := srv.update()

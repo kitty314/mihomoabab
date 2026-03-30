@@ -1,7 +1,7 @@
 package trusttunnel
 
 import (
-	"github.com/metacubex/mihomo/transport/gun"
+	"github.com/metacubex/clash/transport/gun"
 
 	"github.com/metacubex/http"
 	"github.com/metacubex/quic-go/http3"

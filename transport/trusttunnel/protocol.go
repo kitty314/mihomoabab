@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/transport/gun"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/transport/gun"
 )
 
 const (
