@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/metacubex/clash/common/httputils"
 	C "github.com/metacubex/clash/constant"
-	"github.com/metacubex/clash/transport/gun"
 )
 
 const (
@@ -97,7 +97,8 @@ type httpConn struct {
 	body      io.ReadCloser
 	created   chan struct{}
 	createErr error
-	gun.NetAddr
+	cancelFn  func()
+	httputils.NetAddr
 
 	// deadlines
 	deadline *time.Timer
@@ -124,6 +125,9 @@ func (h *httpConn) Close() error {
 	}
 	if h.body != nil {
 		errorArr = append(errorArr, h.body.Close())
+	}
+	if h.cancelFn != nil {
+		h.cancelFn()
 	}
 	return errors.Join(errorArr...)
 }
