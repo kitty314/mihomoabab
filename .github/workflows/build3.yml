@@ -29,12 +29,12 @@ jobs:
     strategy:
       matrix:
         jobs:
-          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-v3-raw, raw: 1}
+          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-v3-go125-raw, raw: 1}
           - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-v3-go124-raw, goversion: '1.24', raw: 1}
 
           # - { goos: windows, goarch: amd64, goamd64: v1, output: amd64-v1 }
           # - { goos: windows, goarch: amd64, goamd64: v2, output: amd64-v2 }
-          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-v3 }
+          - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-v3-go125 }
 
           # Go 1.24 with special patch can work on Windows 7
           # https://github.com/MetaCubeX/go/commits/release-branch.go1.24/
@@ -66,7 +66,7 @@ jobs:
           # - { goos: windows, goarch: amd64, goamd64: v2, output: amd64-v2-go120, goversion: '1.20' }
           # - { goos: windows, goarch: amd64, goamd64: v3, output: amd64-v3-go120, goversion: '1.20' }
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Go
       if: ${{ matrix.jobs.goversion == '' && matrix.jobs.abi != '1' }}
@@ -206,7 +206,7 @@ jobs:
       shell: bash
 
     - name: Archive production artifacts
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: "${{ matrix.jobs.goos }}-${{ matrix.jobs.output }}"
         path: |
@@ -245,7 +245,7 @@ jobs:
   #           bash ./genReleaseNote.sh -v ${PREVERSION}...${CURRENTVERSION}
   #           rm ./genReleaseNote.sh
   
-  #     - uses: actions/download-artifact@v4
+  #     - uses: actions/download-artifact@v8
   #       with:
   #         path: bin/
   #         merge-multiple: true
@@ -269,13 +269,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: metatoc
           fetch-depth: '0'
           fetch-tags: 'true'
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: bin/
           merge-multiple: true
