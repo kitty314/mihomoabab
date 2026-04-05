@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/metacubex/mihomo/adapter/inbound"
-	"github.com/metacubex/mihomo/common/utils"
-	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/clash/adapter/inbound"
+	"github.com/metacubex/clash/common/utils"
+	C "github.com/metacubex/clash/constant"
 )
 
 type Base struct {

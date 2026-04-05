@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"unsafe"
 
-	"github.com/metacubex/mihomo/common/once"
-	"github.com/metacubex/mihomo/common/utils"
-	"github.com/metacubex/mihomo/log"
+	"github.com/metacubex/clash/common/once"
+	"github.com/metacubex/clash/common/utils"
+	"github.com/metacubex/clash/log"
 
 	"github.com/metacubex/tls"
 	utls "github.com/metacubex/utls"

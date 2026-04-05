@@ -6,8 +6,8 @@ import (
 	"runtime/debug"
 	"time"
 
-	N "github.com/metacubex/mihomo/common/net"
-	"github.com/metacubex/mihomo/log"
+	N "github.com/metacubex/clash/common/net"
+	"github.com/metacubex/clash/log"
 
 	"github.com/metacubex/http"
 )

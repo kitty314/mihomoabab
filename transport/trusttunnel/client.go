@@ -11,9 +11,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/mihomo/common/httputils"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/transport/vmess"
+	"github.com/metacubex/clash/common/httputils"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/transport/vmess"
 
 	"github.com/metacubex/http"
 	"github.com/metacubex/tls"

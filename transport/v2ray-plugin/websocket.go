@@ -4,9 +4,9 @@ import (
 	"context"
 	"net"
 
-	"github.com/metacubex/mihomo/component/ca"
-	"github.com/metacubex/mihomo/component/ech"
-	"github.com/metacubex/mihomo/transport/vmess"
+	"github.com/metacubex/clash/component/ca"
+	"github.com/metacubex/clash/component/ech"
+	"github.com/metacubex/clash/transport/vmess"
 
 	"github.com/metacubex/http"
 	"github.com/metacubex/tls"

@@ -15,12 +15,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/mihomo/common/buf"
-	"github.com/metacubex/mihomo/common/httputils"
-	"github.com/metacubex/mihomo/common/pool"
-	tlsC "github.com/metacubex/mihomo/component/tls"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/transport/vmess"
+	"github.com/metacubex/clash/common/buf"
+	"github.com/metacubex/clash/common/httputils"
+	"github.com/metacubex/clash/common/pool"
+	tlsC "github.com/metacubex/clash/component/tls"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/transport/vmess"
 
 	"github.com/metacubex/http"
 	"github.com/metacubex/tls"

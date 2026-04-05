@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/metacubex/mihomo/common/httputils"
+	"github.com/metacubex/clash/common/httputils"
 
 	"github.com/metacubex/http"
 	"github.com/metacubex/tls"

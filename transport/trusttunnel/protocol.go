@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/metacubex/mihomo/common/httputils"
-	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/clash/common/httputils"
+	C "github.com/metacubex/clash/constant"
 )
 
 const (
