@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/mihomo/common/httputils"
-	N "github.com/metacubex/mihomo/common/net"
+	"github.com/metacubex/clash/common/httputils"
+	N "github.com/metacubex/clash/common/net"
 
 	"github.com/metacubex/http"
 	"github.com/metacubex/http/h2c"

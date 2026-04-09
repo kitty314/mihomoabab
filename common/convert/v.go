@@ -165,9 +165,9 @@ func handleVShareLink(names map[string]int, url *url.URL, scheme string, proxy m
 	return nil
 }
 
-// parseXHTTPExtra maps xray-core extra JSON fields to mihomo xhttp-opts fields.
+// parseXHTTPExtra maps xray-core extra JSON fields to clash xhttp-opts fields.
 func parseXHTTPExtra(extra map[string]any, opts map[string]any) {
-	// xmuxToReuse converts an xmux map to mihomo reuse-settings.
+	// xmuxToReuse converts an xmux map to clash reuse-settings.
 	xmuxToReuse := func(xmux map[string]any) map[string]any {
 		reuse := make(map[string]any)
 		set := func(src, dst string) {

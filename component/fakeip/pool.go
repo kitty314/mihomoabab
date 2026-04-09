@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/metacubex/mihomo/component/profile/cachefile"
+	"github.com/metacubex/clash/component/profile/cachefile"
 
 	"go4.org/netipx"
 )

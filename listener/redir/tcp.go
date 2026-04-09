@@ -3,9 +3,9 @@ package redir
 import (
 	"net"
 
-	"github.com/metacubex/mihomo/adapter/inbound"
-	"github.com/metacubex/mihomo/component/keepalive"
-	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/clash/adapter/inbound"
+	"github.com/metacubex/clash/component/keepalive"
+	C "github.com/metacubex/clash/constant"
 )
 
 type Listener struct {

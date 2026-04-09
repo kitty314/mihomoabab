@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/metacubex/mihomo/common/httputils"
+	"github.com/metacubex/clash/common/httputils"
 
 	"github.com/metacubex/http"
 )

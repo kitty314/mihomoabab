@@ -8,12 +8,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metacubex/mihomo/adapter/inbound"
-	"github.com/metacubex/mihomo/adapter/outbound"
-	N "github.com/metacubex/mihomo/common/net"
-	"github.com/metacubex/mihomo/common/utils"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/log"
+	"github.com/metacubex/clash/adapter/inbound"
+	"github.com/metacubex/clash/adapter/outbound"
+	N "github.com/metacubex/clash/common/net"
+	"github.com/metacubex/clash/common/utils"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/log"
 
 	mux "github.com/metacubex/sing-mux"
 	vmess "github.com/metacubex/sing-vmess"
