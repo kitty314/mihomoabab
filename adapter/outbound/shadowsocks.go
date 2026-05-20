@@ -10,7 +10,7 @@ import (
 	"github.com/metacubex/clash/common/structure"
 	C "github.com/metacubex/clash/constant"
 	"github.com/metacubex/clash/ntp"
-	gost "github.com/metacubex/clash/transport/gost-plugin"
+	gost "github.com/metacubex/clash/transport/gost"
 	"github.com/metacubex/clash/transport/kcptun"
 	"github.com/metacubex/clash/transport/restls"
 	obfs "github.com/metacubex/clash/transport/simple-obfs"
@@ -225,12 +225,16 @@ func (ss *ShadowSocks) listenPacketContext(ctx context.Context) (net.PacketConn,
 }
 
 // ListenPacketContext implements C.ProxyAdapter
-func (ss *ShadowSocks) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (C.PacketConn, error) {
+func (ss *ShadowSocks) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (_ C.PacketConn, err error) {
 	if ss.option.UDPOverTCP {
-		c, err := ss.DialContext(ctx, metadata)
+		var c net.Conn
+		c, err = ss.DialContext(ctx, metadata)
 		if err != nil {
 			return nil, err
 		}
+		defer func(c net.Conn) {
+			safeConnClose(c, err)
+		}(c)
 		if err = ss.ResolveUDP(ctx, metadata); err != nil {
 			return nil, err
 		}
@@ -446,18 +450,18 @@ func NewShadowSocks(option ShadowSocksOption) (*ShadowSocks, error) {
 	}
 
 	outbound := &ShadowSocks{
-		Base: &Base{
-			name:   option.Name,
-			addr:   addr,
-			tp:     C.Shadowsocks,
-			pdName: option.ProviderName,
-			udp:    option.UDP,
-			tfo:    option.TFO,
-			mpTcp:  option.MPTCP,
-			iface:  option.Interface,
-			rmark:  option.RoutingMark,
-			prefer: option.IPVersion,
-		},
+		Base: NewBase(BaseOption{
+			Name:         option.Name,
+			Addr:         addr,
+			Type:         C.Shadowsocks,
+			ProviderName: option.ProviderName,
+			UDP:          option.UDP,
+			TFO:          option.TFO,
+			MPTCP:        option.MPTCP,
+			Interface:    option.Interface,
+			RoutingMark:  option.RoutingMark,
+			Prefer:       option.IPVersion,
+		}),
 		method: method,
 
 		option:          &option,
