@@ -9,12 +9,12 @@ import (
 	"os"
 	"sync"
 
-	"github.com/metacubex/mihomo/component/dialer"
-	"github.com/metacubex/mihomo/component/resolver"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/dns"
-	"github.com/metacubex/mihomo/log"
-	ovpn "github.com/metacubex/mihomo/transport/openvpn"
+	"github.com/metacubex/clash/component/dialer"
+	"github.com/metacubex/clash/component/resolver"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/dns"
+	"github.com/metacubex/clash/log"
+	ovpn "github.com/metacubex/clash/transport/openvpn"
 
 	wireguard "github.com/metacubex/sing-wireguard"
 	E "github.com/metacubex/sing/common/exceptions"

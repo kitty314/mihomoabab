@@ -166,7 +166,7 @@ func InstallScriptOptionsString(proto, cipher, auth string) string {
 }
 
 func InstallScriptPeerInfo(cipher string) string {
-	return fmt.Sprintf("IV_VER=mihomo-openvpn\nIV_PROTO=6\nIV_CIPHERS=%s\n", cipher)
+	return fmt.Sprintf("IV_VER=clash-openvpn\nIV_PROTO=6\nIV_CIPHERS=%s\n", cipher)
 }
 
 func appendOpenVPNString(out []byte, s string) []byte {

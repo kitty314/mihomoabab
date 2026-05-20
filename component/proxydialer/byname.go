@@ -6,8 +6,8 @@ import (
 	"net"
 	"net/netip"
 
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/tunnel"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/tunnel"
 )
 
 type byNameProxyDialer struct {

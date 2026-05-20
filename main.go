@@ -14,17 +14,17 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/metacubex/mihomo/common/cmd"
-	"github.com/metacubex/mihomo/component/generator"
-	"github.com/metacubex/mihomo/component/geodata"
-	"github.com/metacubex/mihomo/component/updater"
-	"github.com/metacubex/mihomo/config"
-	C "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/constant/features"
-	"github.com/metacubex/mihomo/hub"
-	"github.com/metacubex/mihomo/hub/executor"
-	"github.com/metacubex/mihomo/log"
-	"github.com/metacubex/mihomo/rules/provider"
+	"github.com/metacubex/clash/common/cmd"
+	"github.com/metacubex/clash/component/generator"
+	"github.com/metacubex/clash/component/geodata"
+	"github.com/metacubex/clash/component/updater"
+	"github.com/metacubex/clash/config"
+	C "github.com/metacubex/clash/constant"
+	"github.com/metacubex/clash/constant/features"
+	"github.com/metacubex/clash/hub"
+	"github.com/metacubex/clash/hub/executor"
+	"github.com/metacubex/clash/log"
+	"github.com/metacubex/clash/rules/provider"
 
 	"go.uber.org/automaxprocs/maxprocs"
 )
@@ -58,7 +58,7 @@ func init() {
 	flag.StringVar(&postUp, "post-up", os.Getenv("CLASH_POST_UP"), "set post-up script")
 	flag.StringVar(&postDown, "post-down", os.Getenv("CLASH_POST_DOWN"), "set post-down script")
 	flag.BoolVar(&geodataMode, "m", false, "set geodata mode")
-	flag.BoolVar(&version, "v", false, "show current version of mihomo")
+	flag.BoolVar(&version, "v", false, "show current version of clash")
 	flag.BoolVar(&testConfig, "t", false, "test configuration and exit")
 	flag.Parse()
 }
@@ -95,7 +95,7 @@ func main() {
 	}
 
 	if version {
-		fmt.Printf("Mihomo Meta %s %s %s with %s %s\n",
+		fmt.Printf("Clash Meta %s %s %s with %s %s\n",
 			C.Version, runtime.GOOS, runtime.GOARCH, runtime.Version(), C.BuildTime)
 		if tags := features.Tags(); len(tags) != 0 {
 			fmt.Printf("Use tags: %s\n", strings.Join(tags, ", "))

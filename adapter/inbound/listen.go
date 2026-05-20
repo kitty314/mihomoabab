@@ -7,8 +7,8 @@ import (
 	"net/netip"
 	"sync"
 
-	"github.com/metacubex/mihomo/component/keepalive"
-	"github.com/metacubex/mihomo/component/mptcp"
+	"github.com/metacubex/clash/component/keepalive"
+	"github.com/metacubex/clash/component/mptcp"
 
 	"github.com/metacubex/tfo-go"
 )

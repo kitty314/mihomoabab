@@ -10,8 +10,8 @@ import (
 	"io"
 	"net"
 
-	"github.com/metacubex/mihomo/common/pool"
-	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/clash/common/pool"
+	C "github.com/metacubex/clash/constant"
 
 	"github.com/metacubex/tls"
 )

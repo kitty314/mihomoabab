@@ -17,8 +17,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/metacubex/mihomo/log"
-	"github.com/metacubex/mihomo/ntp"
+	"github.com/metacubex/clash/log"
+	"github.com/metacubex/clash/ntp"
 
 	"github.com/metacubex/http"
 	"github.com/metacubex/randv2"

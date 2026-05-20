@@ -4,7 +4,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/metacubex/mihomo/log"
+	"github.com/metacubex/clash/log"
 
 	"github.com/metacubex/bbolt"
 	"github.com/vmihailenco/msgpack/v5"
